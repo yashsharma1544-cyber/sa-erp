@@ -1,14 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { t, type Locale } from "@/lib/i18n";
 import { formatDateTime } from "@/lib/format";
 
 type User = { id: string; full_name: string };
 
 export function PinLoginForm({ users, initialLocale }: { users: User[]; initialLocale: Locale }) {
-  const router = useRouter();
   const [locale, setLocale] = useState<Locale>(initialLocale);
   const [query, setQuery] = useState("");
   const [user, setUser] = useState<User | null>(null);
@@ -39,8 +37,8 @@ export function PinLoginForm({ users, initialLocale }: { users: User[]; initialL
       });
       const body = await res.json();
       if (body.ok) {
-        router.replace("/f");
-        router.refresh();
+        // Full page load so the server sees the new session cookie straight away.
+        window.location.assign("/f");
         return;
       }
       setPin("");

@@ -1,13 +1,13 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 function LoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/";
+  const rawNext = params.get("next") || "/";
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -18,10 +18,12 @@ function LoginForm() {
     setBusy(true);
     setMessage(null);
     const { error } = await createClient().auth.signInWithPassword({ email, password });
-    setBusy(false);
-    if (error) return setMessage({ kind: "error", text: error.message });
-    router.replace(next);
-    router.refresh();
+    if (error) {
+      setBusy(false);
+      return setMessage({ kind: "error", text: error.message });
+    }
+    // Full page load so the server sees the new session cookie straight away.
+    window.location.assign(next);
   }
 
   async function sendMagicLink() {
@@ -72,7 +74,7 @@ function LoginForm() {
         disabled={busy || !password}
         className="w-full rounded-md bg-brand px-3 py-2 font-medium text-white disabled:opacity-50"
       >
-        Sign in
+        {busy ? "Signing in…" : "Sign in"}
       </button>
       <button
         type="button"
