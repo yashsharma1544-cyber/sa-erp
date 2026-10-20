@@ -35,6 +35,20 @@ Done so far: steps 1–3 (Supabase project `lkyevpdxhayuyvvnypmi`, migrations 00
      - `FIELD_AUTH_SECRET`: a random string of 32 or more characters. To generate one in PowerShell:
        `[Convert]::ToBase64String((1..48 | ForEach-Object { Get-Random -Max 256 }))`
 
+## Import from Tally (one-time)
+
+The masters were imported on 2026-10-21 from TallySync (`tsv2`, read-only).
+To finish it, open **Admin → Import from Tally**:
+
+1. Pick **Anjali Agency**, tab **To match**.
+2. For each ledger: **Link** (to the suggested customer), **Other…** (search
+   and pick a customer), **New** (it's a different shop), **Not a customer**
+   (cash/bank/office ledgers) or **Skip**.
+3. When the rest are all different shops, use **Create all as new**.
+4. Any decision can be undone from its tab.
+
+Then open **Customers** and give a beat to customers that have none.
+
 ## Adding a new financial year
 
 Each March, open **JC calendar** → **+ Generate FY xx-yy** (owner only). The SQL alternative is `select public.generate_journey_cycles(2027);`.

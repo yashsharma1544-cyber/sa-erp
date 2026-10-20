@@ -42,6 +42,7 @@ export default async function OfficeLayout({ children }: { children: React.React
         ...(can(me, "users.manage") ? [{ href: "/users", label: "Users", icon: "users" as const }] : []),
         ...(isOwner ? [{ href: "/approval-limits", label: "Approval limits", icon: "limits" as const }] : []),
         ...(isOwner ? [{ href: "/audit", label: "Audit log", icon: "audit" as const }] : []),
+        ...(can(me, "masters.manage") ? [{ href: "/import", label: "Import from Tally", icon: "import" as const }] : []),
       ],
     },
     {

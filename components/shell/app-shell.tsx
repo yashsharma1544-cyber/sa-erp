@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   Building,
+  FileInput,
   CalendarDays,
   KeyRound,
   Map,
@@ -37,7 +38,8 @@ export type NavIcon =
   | "beats"
   | "items"
   | "suppliers"
-  | "vehicles";
+  | "vehicles"
+  | "import";
 export type NavItem = { href: string; label: string; icon: NavIcon; badge?: number };
 export type NavSection = { title?: string; items: NavItem[] };
 
@@ -54,6 +56,7 @@ const icons: Record<NavIcon, LucideIcon> = {
   items: Package,
   suppliers: Building,
   vehicles: Truck,
+  import: FileInput,
 };
 
 function initials(name: string) {
