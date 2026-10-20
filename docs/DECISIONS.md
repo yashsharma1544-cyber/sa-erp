@@ -35,7 +35,7 @@ Newest decisions are added at the bottom. Each entry gives the date, the decisio
 
 | ID | Date | Decision | By |
 |---|---|---|---|
-| D-16 | 2026-10-20 | `docs/ARCHITECTURE.md` approved. Building starts with Phase 0, slice 0.1. Until the `sa-erp` repo exists, the code lives in the `sa-erp/` folder of `rupyz-tally-erp`, which excludes that folder from its own type-check. | Owner |
+| D-16 | 2026-10-20 | `docs/ARCHITECTURE.md` approved. Building starts with Phase 0, slice 0.1. | Owner |
 | D-17 | 2026-10-20 | Soft-deleted rows are visible only to people who may edit that table, so they can restore them. Everyone else never sees them. Hard delete is blocked by a database trigger, even for admin connections. | Claude (convention) |
 | D-18 | 2026-10-20 | The audit log never stores PIN hashes. The changed field name is still recorded. | Claude (convention) |
 | D-19 | 2026-10-20 | ~~The sales admin is the accounts staff.~~ **Withdrawn the same day:** the owner corrected it, and the sales admin is *not* accounts. Who the sales admin is remains open (Q-2). | Owner |
@@ -43,3 +43,6 @@ Newest decisions are added at the bottom. Each entry gives the date, the decisio
 | D-21 | 2026-10-20 | The sales admin's approval limits are decided later. Until then they have **no rupee cap**, but nobody except the owner can approve for **bad-debt** customers. The owner sets limits on the Approval limits screen. | Owner |
 | D-22 | 2026-10-20 | **Field login design:**<br>• Each PIN user has a hidden Supabase login whose password is derived from the server secret `FIELD_AUTH_SECRET`, so it is never stored.<br>• The PIN is bcrypt-hashed and checked in the database.<br>• Easy PINs (1234, 0000…) are refused.<br>• The PIN login screen lists the names of active field staff, so a person can tap their name instead of typing it. | Claude (convention) |
 | D-23 | 2026-10-20 | **Approval queue rules:**<br>• Every approval kind (credit, discount, return, order, scheme) goes through one queue.<br>• Requests are raised and decided only through database functions.<br>• Nobody except the owner can decide their own request.<br>• Rejecting is always allowed. Approving checks the person's permission, their firm access and their rupee cap.<br>• Delegations can be limited to dates (e.g. while the owner is away). | Claude (convention) |
+| D-24 | 2026-10-20 | The code lives in its own repo, **`yashsharma1544-cyber/sa-erp`** (moved from a temporary folder in `rupyz-tally-erp`). The database is the Supabase project **`sa-erp`** (ref `lkyevpdxhayuyvvnypmi`, Mumbai), created by the owner. Migrations 0001–0003 were applied by Claude. | Owner |
+| D-25 | 2026-10-20 | The owner's email is set up as the owner account. The account becomes active on the first sign-in with that email. | Owner |
+| D-26 | 2026-10-20 | Supabase's security check flags the `security definer` approval/PIN/audit functions and the audit log table having no read rules. Both are deliberate: each function checks permissions inside, and the audit log is read only through `audit_log()`. | Claude (convention) |

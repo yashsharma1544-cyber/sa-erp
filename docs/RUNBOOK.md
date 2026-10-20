@@ -13,6 +13,8 @@ npm test            # unit tests (formatting, JC calendar)
 
 ## First-time setup
 
+Done so far: steps 1–3 (Supabase project `lkyevpdxhayuyvvnypmi`, migrations 0001–0003, owner bootstrap).
+
 1. **Supabase project.** Create a new project in region Mumbai (`ap-south-1`).
 2. **Migrations.** In Supabase → SQL Editor, run each file in `supabase/migrations/` **in filename order**. Run one file at a time and wait for "Success" before starting the next.
 3. **Owner login.**
@@ -26,7 +28,6 @@ npm test            # unit tests (formatting, JC calendar)
    - Add `https://<your-vercel-url>/auth/callback` to the Redirect URLs.
 5. **Vercel.**
    - Import the GitHub repo.
-   - If the app is still inside `rupyz-tally-erp`, set **Root Directory = `sa-erp`**.
    - Add these environment variables (Production and Preview):
      - `NEXT_PUBLIC_SUPABASE_URL`
      - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
