@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, Field, Input } from "@/components/ui/field";
 import { TD, TH, THead, TR, Table } from "@/components/ui/table";
-import { createUser, retryLogin, setActive, setPin, updateAccess } from "./actions";
+import { createUser, retryLogin, setActive, setPin, updateAccess, updateBeats } from "./actions";
 
 export type UserRow = {
   id: string;
@@ -27,9 +27,12 @@ export type UserRow = {
   locked_until: string | null;
   roles: string[];
   firmIds: string[];
+  salesBeatIds: string[];
+  collectionBeatIds: string[];
 };
 
 type Firm = { id: string; code: string; name: string };
+type Beat = { id: string; name: string; territory_name: string };
 type Run = (fn: () => Promise<{ error?: string; warning?: string }>, ok: string, after?: () => void) => void;
 
 const ALL_ROLES: AppRole[] = ["owner", "sales_admin", "accounts", "stores", "dispatch", "driver", "salesman", "collector"];
@@ -78,11 +81,13 @@ function Chips<T extends string>({
 export function UsersClient({
   users,
   firms,
+  beats,
   canGrantOwner,
   myUserId,
 }: {
   users: UserRow[];
   firms: Firm[];
+  beats: Beat[];
   canGrantOwner: boolean;
   myUserId: string;
 }) {
@@ -93,6 +98,7 @@ export function UsersClient({
 
   const roleOptions = ALL_ROLES.filter((r) => r !== "owner" || canGrantOwner).map((r) => ({ value: r, label: roleLabels[r]!.en }));
   const firmOptions = firms.map((f) => ({ value: f.id, label: f.name }));
+  const beatOptions = beats.map((b) => ({ value: b.id, label: b.name }));
 
   const run: Run = (fn, ok, after) => {
     start(async () => {
@@ -138,7 +144,7 @@ export function UsersClient({
               <TH>Name</TH>
               <TH>Login</TH>
               <TH>Roles</TH>
-              <TH>Firms</TH>
+              <TH>Firms / beats</TH>
               <TH>Status</TH>
               <TH />
             </tr>
@@ -154,6 +160,7 @@ export function UsersClient({
                 pending={pending}
                 roleOptions={roleOptions}
                 firmOptions={firmOptions}
+                beatOptions={beatOptions}
                 onEdit={() => setEditing(editing === u.id ? null : u.id)}
                 run={run}
               />
@@ -281,6 +288,7 @@ function UserRowView({
   pending,
   roleOptions,
   firmOptions,
+  beatOptions,
   onEdit,
   run,
 }: {
@@ -291,12 +299,15 @@ function UserRowView({
   pending: boolean;
   roleOptions: { value: AppRole; label: string }[];
   firmOptions: { value: string; label: string }[];
+  beatOptions: { value: string; label: string }[];
   onEdit: () => void;
   run: Run;
 }) {
   const [roles, setRoles] = useState<AppRole[]>(u.roles as AppRole[]);
   const [firmIds, setFirmIds] = useState<string[]>(u.firmIds);
   const [newPin, setNewPin] = useState("");
+  const [salesBeats, setSalesBeats] = useState<string[]>(u.salesBeatIds);
+  const [collectionBeats, setCollectionBeats] = useState<string[]>(u.collectionBeatIds);
   const locked = u.locked_until && new Date(u.locked_until) > new Date();
 
   const status = !u.active ? (
@@ -347,7 +358,9 @@ function UserRowView({
           </div>
         </TD>
         <TD className="text-slate-600">
-          {u.firmIds.map((id) => firms.find((f) => f.id === id)?.code).filter(Boolean).join(", ") || "—"}
+          {u.login_kind === "pin"
+            ? `${new Set([...u.salesBeatIds, ...u.collectionBeatIds]).size} beats`
+            : u.firmIds.map((id) => firms.find((f) => f.id === id)?.code).filter(Boolean).join(", ") || "—"}
         </TD>
         <TD>{status}</TD>
         <TD className="text-right">
@@ -366,6 +379,25 @@ function UserRowView({
               onChange={setRoles}
             />
             {u.login_kind === "email" && <Chips label="Firms" options={firmOptions} selected={firmIds} onChange={setFirmIds} />}
+            {u.login_kind === "pin" && (
+              <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+                <p className="text-sm text-slate-600">Field staff only see customers in these beats.</p>
+                {roles.includes("salesman") && (
+                  <Chips label="Sales beats (takes orders)" options={beatOptions} selected={salesBeats} onChange={setSalesBeats} />
+                )}
+                {(roles.includes("collector") || roles.includes("driver")) && (
+                  <Chips label="Collection beats" options={beatOptions} selected={collectionBeats} onChange={setCollectionBeats} />
+                )}
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={pending}
+                  onClick={() => run(() => updateBeats(u.id, roles.includes("salesman") ? salesBeats : [], collectionBeats), "Beats updated")}
+                >
+                  Save beats
+                </Button>
+              </div>
+            )}
             <div className="flex flex-wrap items-end gap-2">
               <Button size="sm" disabled={pending} onClick={() => run(() => updateAccess(u.id, roles, firmIds), "Access updated")}>
                 Save access

@@ -209,3 +209,40 @@ export async function setPin(userId: string, pin: string): Promise<Result> {
   const { error } = await supabase.rpc("set_user_pin", { p_user_id: userId, p_pin: pin });
   return error ? { error: error.message } : done();
 }
+
+/** Set which beats a field user covers, separately for sales and for collection. */
+export async function updateBeats(userId: string, salesBeatIds: string[], collectionBeatIds: string[]): Promise<Result> {
+  await requirePermission("users.manage");
+  const ids = z.array(z.string().uuid());
+  if (!z.string().uuid().safeParse(userId).success || !ids.safeParse(salesBeatIds).success || !ids.safeParse(collectionBeatIds).success) {
+    return { error: "Invalid beats" };
+  }
+  const supabase = await createClient();
+  const { data: current, error } = await supabase
+    .from("user_beats")
+    .select("id, beat_id, purpose")
+    .eq("user_id", userId)
+    .is("deleted_at", null);
+  if (error) return { error: error.message };
+
+  const wanted = [
+    ...salesBeatIds.map((beat_id) => ({ beat_id, purpose: "sales" })),
+    ...collectionBeatIds.map((beat_id) => ({ beat_id, purpose: "collection" })),
+  ];
+  const key = (r: { beat_id: string; purpose: string }) => `${r.purpose}:${r.beat_id}`;
+  const have = new Set((current ?? []).map(key));
+  const want = new Set(wanted.map(key));
+
+  const toRemove = (current ?? []).filter((r) => !want.has(key(r))).map((r) => r.id);
+  const toAdd = wanted.filter((r) => !have.has(key(r))).map((r) => ({ ...r, user_id: userId }));
+
+  if (toRemove.length) {
+    const { error: e } = await supabase.from("user_beats").update({ deleted_at: new Date().toISOString() }).in("id", toRemove);
+    if (e) return { error: e.message };
+  }
+  if (toAdd.length) {
+    const { error: e } = await supabase.from("user_beats").insert(toAdd);
+    if (e) return { error: e.message };
+  }
+  return done();
+}

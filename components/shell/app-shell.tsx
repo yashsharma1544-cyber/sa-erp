@@ -4,7 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
+  Building,
   CalendarDays,
+  KeyRound,
+  Map,
+  Package,
+  Store,
+  Truck,
   CheckCircle2,
   ChevronDown,
   Home,
@@ -19,7 +25,19 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type NavIcon = "home" | "approvals" | "users" | "limits" | "calendar" | "settings" | "audit";
+export type NavIcon =
+  | "home"
+  | "approvals"
+  | "users"
+  | "limits"
+  | "calendar"
+  | "settings"
+  | "audit"
+  | "customers"
+  | "beats"
+  | "items"
+  | "suppliers"
+  | "vehicles";
 export type NavItem = { href: string; label: string; icon: NavIcon; badge?: number };
 export type NavSection = { title?: string; items: NavItem[] };
 
@@ -31,6 +49,11 @@ const icons: Record<NavIcon, LucideIcon> = {
   calendar: CalendarDays,
   settings: Settings,
   audit: ScrollText,
+  customers: Store,
+  beats: Map,
+  items: Package,
+  suppliers: Building,
+  vehicles: Truck,
 };
 
 function initials(name: string) {
@@ -174,6 +197,9 @@ export function AppShell({
                   <div className="text-sm font-medium">{userName}</div>
                   <div className="text-xs capitalize text-slate-500">{userRoles}</div>
                 </div>
+                <Link href="/account" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                  <KeyRound className="h-4 w-4" /> Change password
+                </Link>
                 <form action="/auth/signout" method="post">
                   <button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
                     <LogOut className="h-4 w-4" /> Sign out

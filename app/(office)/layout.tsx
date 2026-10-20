@@ -23,6 +23,20 @@ export default async function OfficeLayout({ children }: { children: React.React
       ],
     },
     {
+      title: "Masters",
+      items: [
+        { href: "/customers", label: "Customers", icon: "customers" },
+        { href: "/beats", label: "Beats & territories", icon: "beats" },
+        { href: "/items", label: "Items", icon: "items" },
+        ...(me.roles.some((r) => r !== "salesman" && r !== "collector" && r !== "driver")
+          ? [
+              { href: "/suppliers", label: "Suppliers", icon: "suppliers" as const },
+              { href: "/vehicles", label: "Vehicles", icon: "vehicles" as const },
+            ]
+          : []),
+      ],
+    },
+    {
       title: "Admin",
       items: [
         ...(can(me, "users.manage") ? [{ href: "/users", label: "Users", icon: "users" as const }] : []),
