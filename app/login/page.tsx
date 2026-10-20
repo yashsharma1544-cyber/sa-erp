@@ -2,7 +2,11 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Smartphone } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { AuthLayout } from "@/components/shell/auth-layout";
+import { Button } from "@/components/ui/button";
+import { Alert, Field, Input } from "@/components/ui/field";
 
 function LoginForm() {
   const params = useSearchParams();
@@ -40,63 +44,53 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={signInWithPassword} className="w-full max-w-sm space-y-4 rounded-xl bg-white p-6 shadow">
-      <div>
-        <h1 className="text-xl font-semibold">SA ERP</h1>
-        <p className="text-sm text-slate-500">Sushil Agencies · Anjali Agency</p>
+    <div className="space-y-8">
+      <div className="lg:hidden">
+        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-700 text-base font-bold text-white">SA</span>
       </div>
-      <label className="block text-sm">
-        Email
-        <input
-          type="email"
-          required
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2"
-        />
-      </label>
-      <label className="block text-sm">
-        Password
-        <input
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2"
-        />
-      </label>
-      {message && (
-        <p className={message.kind === "error" ? "text-sm text-red-600" : "text-sm text-green-700"}>{message.text}</p>
-      )}
-      <button
-        type="submit"
-        disabled={busy || !password}
-        className="w-full rounded-md bg-brand px-3 py-2 font-medium text-white disabled:opacity-50"
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
+        <p className="mt-1 text-sm text-slate-500">Office and owner login</p>
+      </div>
+
+      <form onSubmit={signInWithPassword} className="space-y-4">
+        <Field label="Email">
+          <Input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        </Field>
+        <Field label="Password">
+          <Input
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </Field>
+        {message && <Alert kind={message.kind === "error" ? "error" : "success"}>{message.text}</Alert>}
+        <Button type="submit" size="lg" className="w-full" disabled={busy || !password}>
+          {busy ? "Signing in…" : "Sign in"}
+        </Button>
+        <Button type="button" variant="secondary" className="w-full" onClick={sendMagicLink} disabled={busy}>
+          Email me a sign-in link
+        </Button>
+      </form>
+
+      <a
+        href="/pin-login"
+        className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-600 hover:bg-white"
       >
-        {busy ? "Signing in…" : "Sign in"}
-      </button>
-      <button
-        type="button"
-        onClick={sendMagicLink}
-        disabled={busy}
-        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:opacity-50"
-      >
-        Email me a sign-in link
-      </button>
-      <a href="/pin-login" className="block text-center text-sm text-slate-500 underline">
-        Field staff: sign in with PIN / फील्ड स्टाफ: पिन लॉगिन
+        <Smartphone className="h-4 w-4" />
+        Field staff: PIN login · फील्ड स्टाफ: पिन लॉगिन
       </a>
-    </form>
+    </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
+    <AuthLayout>
       <Suspense>
         <LoginForm />
       </Suspense>
-    </main>
+    </AuthLayout>
   );
 }

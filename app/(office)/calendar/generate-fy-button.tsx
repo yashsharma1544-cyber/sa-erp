@@ -2,14 +2,17 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
 import { fyLabel } from "@/lib/jc";
+import { Button } from "@/components/ui/button";
 import { generateFiscalYear } from "./actions";
 
 export function GenerateFyButton({ startYear }: { startYear: number }) {
   const [pending, start] = useTransition();
   const router = useRouter();
   return (
-    <button
+    <Button
+      variant="secondary"
       disabled={pending}
       onClick={() =>
         start(async () => {
@@ -18,9 +21,9 @@ export function GenerateFyButton({ startYear }: { startYear: number }) {
           else router.push(`/calendar?fy=${startYear}`);
         })
       }
-      className="rounded-md border border-dashed border-slate-400 px-3 py-1 text-sm disabled:opacity-50"
     >
-      {pending ? "Generating…" : `+ Generate FY ${fyLabel(startYear)}`}
-    </button>
+      <Plus className="h-4 w-4" />
+      {pending ? "Generating…" : `Generate FY ${fyLabel(startYear)}`}
+    </Button>
   );
 }

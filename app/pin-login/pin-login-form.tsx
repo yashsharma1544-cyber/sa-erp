@@ -60,22 +60,28 @@ export function PinLoginForm({ users, initialLocale }: { users: User[]; initialL
   }
 
   return (
-    <div className="w-full max-w-sm space-y-4">
+    <div className="w-full max-w-sm space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">{t(locale, "appName")}</h1>
-        <button onClick={switchLocale} className="rounded-md border border-slate-300 px-3 py-1 text-sm">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-700 text-sm font-bold text-white">SA</span>
+          <h1 className="text-lg font-semibold">{t(locale, "appName")}</h1>
+        </div>
+        <button
+          onClick={switchLocale}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm"
+        >
           {locale === "mr" ? "English" : "मराठी"}
         </button>
       </div>
 
       {!user ? (
         <section className="space-y-3">
-          <h2 className="text-lg">{t(locale, "chooseName")}</h2>
+          <h2 className="text-xl font-semibold">{t(locale, "chooseName")}</h2>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t(locale, "searchName")}
-            className="w-full rounded-md border border-slate-300 px-3 py-3 text-lg"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-lg shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20"
           />
           <ul className="space-y-2">
             {filtered.map((u) => (
@@ -86,8 +92,11 @@ export function PinLoginForm({ users, initialLocale }: { users: User[]; initialL
                     setPin("");
                     setError(null);
                   }}
-                  className="w-full rounded-lg bg-white px-4 py-4 text-left text-lg shadow-sm active:bg-slate-100"
+                  className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-4 text-left text-lg shadow-card active:bg-brand-50"
                 >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-800">
+                    {u.full_name.slice(0, 1).toUpperCase()}
+                  </span>
                   {u.full_name}
                 </button>
               </li>
@@ -102,24 +111,26 @@ export function PinLoginForm({ users, initialLocale }: { users: User[]; initialL
           <button onClick={() => setUser(null)} className="text-sm text-slate-500">
             ← {t(locale, "back")}
           </button>
-          <div className="text-lg font-medium">{user.full_name}</div>
-          <div className="text-slate-600">{t(locale, "enterPin")}</div>
+          <div className="text-center">
+            <div className="text-xl font-semibold">{user.full_name}</div>
+            <div className="mt-1 text-slate-600">{t(locale, "enterPin")}</div>
+          </div>
           <div className="flex justify-center gap-3" aria-label="PIN">
             {[0, 1, 2, 3].map((i) => (
               <span
                 key={i}
-                className={"h-4 w-4 rounded-full " + (i < pin.length ? "bg-brand" : "border-2 border-slate-400")}
+                className={"h-4 w-4 rounded-full transition " + (i < pin.length ? "bg-brand-700" : "border-2 border-slate-300")}
               />
             ))}
           </div>
-          {error && <p className="text-center text-red-600">{error}</p>}
+          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-center text-sm text-red-700">{error}</p>}
           <div className="grid grid-cols-3 gap-3">
             {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
               <button
                 key={d}
                 disabled={busy}
                 onClick={() => press(d)}
-                className="rounded-xl bg-white py-5 text-2xl shadow-sm active:bg-slate-200 disabled:opacity-50"
+                className="rounded-2xl border border-slate-200 bg-white py-5 text-2xl font-medium shadow-card active:bg-brand-50 disabled:opacity-50"
               >
                 {d}
               </button>
@@ -130,7 +141,7 @@ export function PinLoginForm({ users, initialLocale }: { users: User[]; initialL
             <button
               disabled={busy}
               onClick={() => press("0")}
-              className="rounded-xl bg-white py-5 text-2xl shadow-sm active:bg-slate-200 disabled:opacity-50"
+              className="rounded-2xl border border-slate-200 bg-white py-5 text-2xl font-medium shadow-card active:bg-brand-50 disabled:opacity-50"
             >
               0
             </button>

@@ -1,9 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { KeyRound, Mail, Plus, Smartphone, X } from "lucide-react";
 import { formatDateTime } from "@/lib/format";
 import { roleLabels } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 import type { AppRole } from "@/lib/auth";
+import { PageHeader } from "@/components/ui/page-header";
+import { Card, CardBody, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, Field, Input } from "@/components/ui/field";
+import { TD, TH, THead, TR, Table } from "@/components/ui/table";
 import { createUser, retryLogin, setActive, setPin, updateAccess } from "./actions";
 
 export type UserRow = {
@@ -22,6 +30,7 @@ export type UserRow = {
 };
 
 type Firm = { id: string; code: string; name: string };
+type Run = (fn: () => Promise<{ error?: string; warning?: string }>, ok: string, after?: () => void) => void;
 
 const ALL_ROLES: AppRole[] = ["owner", "sales_admin", "accounts", "stores", "dispatch", "driver", "salesman", "collector"];
 const FIELD_ROLES: AppRole[] = ["driver", "salesman", "collector"];
@@ -30,7 +39,7 @@ function toggle<T>(list: T[], item: T): T[] {
   return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
 }
 
-function Checkboxes<T extends string>({
+function Chips<T extends string>({
   options,
   selected,
   onChange,
@@ -43,14 +52,24 @@ function Checkboxes<T extends string>({
 }) {
   return (
     <fieldset>
-      <legend className="mb-1 text-sm text-slate-600">{label}</legend>
+      <legend className="mb-1.5 text-sm font-medium text-slate-700">{label}</legend>
       <div className="flex flex-wrap gap-2">
-        {options.map((o) => (
-          <label key={o.value} className="flex items-center gap-1 rounded border border-slate-200 px-2 py-1 text-sm">
-            <input type="checkbox" checked={selected.includes(o.value)} onChange={() => onChange(toggle(selected, o.value))} />
-            {o.label}
-          </label>
-        ))}
+        {options.map((o) => {
+          const on = selected.includes(o.value);
+          return (
+            <button
+              type="button"
+              key={o.value}
+              onClick={() => onChange(toggle(selected, o.value))}
+              className={cn(
+                "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
+                on ? "border-brand-600 bg-brand-50 text-brand-800" : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50",
+              )}
+            >
+              {o.label}
+            </button>
+          );
+        })}
       </div>
     </fieldset>
   );
@@ -69,40 +88,39 @@ export function UsersClient({
 }) {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
-  const [flash, setFlash] = useState<{ kind: "error" | "ok"; text: string } | null>(null);
+  const [flash, setFlash] = useState<{ kind: "error" | "success"; text: string } | null>(null);
   const [pending, start] = useTransition();
 
-  const roleOptions = ALL_ROLES.filter((r) => r !== "owner" || canGrantOwner).map((r) => ({
-    value: r,
-    label: roleLabels[r]!.en,
-  }));
-  const firmOptions = firms.map((f) => ({ value: f.id, label: `${f.code} · ${f.name}` }));
+  const roleOptions = ALL_ROLES.filter((r) => r !== "owner" || canGrantOwner).map((r) => ({ value: r, label: roleLabels[r]!.en }));
+  const firmOptions = firms.map((f) => ({ value: f.id, label: f.name }));
 
-  function run(fn: () => Promise<{ error?: string; warning?: string }>, ok: string, after?: () => void) {
+  const run: Run = (fn, ok, after) => {
     start(async () => {
       const res = await fn();
       if (res.error) setFlash({ kind: "error", text: res.error });
       else {
-        setFlash({ kind: "ok", text: res.warning ?? ok });
+        setFlash({ kind: "success", text: res.warning ?? ok });
         after?.();
       }
     });
-  }
+  };
+
+  const field = users.filter((u) => u.login_kind === "pin").length;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Users</h1>
-        <button onClick={() => setAdding((a) => !a)} className="rounded-md bg-brand px-3 py-2 text-sm text-white">
-          {adding ? "Close" : "+ Add user"}
-        </button>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Users"
+        description={`${users.length} people · ${users.length - field} office · ${field} field`}
+        actions={
+          <Button onClick={() => setAdding((a) => !a)} variant={adding ? "secondary" : "primary"}>
+            {adding ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+            {adding ? "Close" : "Add user"}
+          </Button>
+        }
+      />
 
-      {flash && (
-        <p className={flash.kind === "error" ? "rounded bg-red-50 p-2 text-sm text-red-700" : "rounded bg-green-50 p-2 text-sm text-green-800"}>
-          {flash.text}
-        </p>
-      )}
+      {flash && <Alert kind={flash.kind}>{flash.text}</Alert>}
 
       {adding && (
         <AddUserForm
@@ -113,18 +131,18 @@ export function UsersClient({
         />
       )}
 
-      <div className="overflow-x-auto rounded-xl bg-white shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-100 text-left text-slate-600">
+      <Card>
+        <Table>
+          <THead>
             <tr>
-              <th className="px-3 py-2">Name</th>
-              <th className="px-3 py-2">Login</th>
-              <th className="px-3 py-2">Roles</th>
-              <th className="px-3 py-2">Firms</th>
-              <th className="px-3 py-2">Status</th>
-              <th className="px-3 py-2" />
+              <TH>Name</TH>
+              <TH>Login</TH>
+              <TH>Roles</TH>
+              <TH>Firms</TH>
+              <TH>Status</TH>
+              <TH />
             </tr>
-          </thead>
+          </THead>
           <tbody>
             {users.map((u) => (
               <UserRowView
@@ -141,8 +159,8 @@ export function UsersClient({
               />
             ))}
           </tbody>
-        </table>
-      </div>
+        </Table>
+      </Card>
     </div>
   );
 }
@@ -168,83 +186,90 @@ function AddUserForm({
   const [firmIds, setFirmIds] = useState<string[]>([]);
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit({
-          fullName,
-          loginKind,
-          email,
-          phone,
-          whatsapp,
-          pin,
-          roles,
-          firmIds,
-          locale: loginKind === "pin" ? "mr" : "en",
-        });
-      }}
-      className="grid gap-3 rounded-xl bg-white p-4 shadow-sm md:grid-cols-2"
-    >
-      <label className="text-sm">
-        Full name
-        <input required value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-1 w-full rounded border border-slate-300 px-2 py-1.5" />
-      </label>
-      <fieldset className="text-sm">
-        <legend className="mb-1">Login type</legend>
-        <label className="mr-4">
-          <input type="radio" checked={loginKind === "pin"} onChange={() => setLoginKind("pin")} /> Field (name + PIN)
-        </label>
-        <label>
-          <input type="radio" checked={loginKind === "email"} onChange={() => setLoginKind("email")} /> Office (email)
-        </label>
-      </fieldset>
-      {loginKind === "email" ? (
-        <label className="text-sm">
-          Email (an invite is sent here)
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 w-full rounded border border-slate-300 px-2 py-1.5" />
-        </label>
-      ) : (
-        <label className="text-sm">
-          4-digit PIN
-          <input
-            required
-            inputMode="numeric"
-            pattern="\d{4}"
-            maxLength={4}
-            value={pin}
-            onChange={(e) => setPinValue(e.target.value.replace(/\D/g, ""))}
-            className="mt-1 w-full rounded border border-slate-300 px-2 py-1.5"
+    <Card>
+      <CardHeader title="New user" description="Field staff sign in with name + PIN on their phone. Office staff get an email invite." />
+      <CardBody>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit({ fullName, loginKind, email, phone, whatsapp, pin, roles, firmIds, locale: loginKind === "pin" ? "mr" : "en" });
+          }}
+          className="space-y-5"
+        >
+          <div className="grid gap-3 sm:grid-cols-2">
+            {(
+              [
+                { kind: "pin", icon: Smartphone, title: "Field staff", text: "Salesman, collector, driver. Name + 4-digit PIN." },
+                { kind: "email", icon: Mail, title: "Office staff", text: "Accounts, stores, dispatch, sales admin. Email login." },
+              ] as const
+            ).map(({ kind, icon: Icon, title, text }) => (
+              <button
+                type="button"
+                key={kind}
+                onClick={() => {
+                  setLoginKind(kind);
+                  setRoles([]);
+                }}
+                className={cn(
+                  "flex items-start gap-3 rounded-xl border p-4 text-left transition-colors",
+                  loginKind === kind ? "border-brand-600 bg-brand-50 ring-1 ring-brand-600" : "border-slate-200 hover:bg-slate-50",
+                )}
+              >
+                <Icon className={cn("mt-0.5 h-5 w-5", loginKind === kind ? "text-brand-700" : "text-slate-400")} />
+                <span>
+                  <span className="block text-sm font-semibold">{title}</span>
+                  <span className="block text-sm text-slate-500">{text}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Full name">
+              <Input required value={fullName} onChange={(e) => setFullName(e.target.value)} />
+            </Field>
+            {loginKind === "email" ? (
+              <Field label="Email" hint="An invite is sent here.">
+                <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+              </Field>
+            ) : (
+              <Field label="4-digit PIN" hint="Easy PINs like 1234 or 0000 are refused.">
+                <Input
+                  required
+                  inputMode="numeric"
+                  pattern="\d{4}"
+                  maxLength={4}
+                  value={pin}
+                  onChange={(e) => setPinValue(e.target.value.replace(/\D/g, ""))}
+                  className="num tracking-[0.5em]"
+                />
+              </Field>
+            )}
+            <Field label="Phone">
+              <Input inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            </Field>
+            <Field label="WhatsApp">
+              <Input inputMode="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} />
+            </Field>
+          </div>
+
+          <Chips
+            label="Roles"
+            options={loginKind === "pin" ? roleOptions.filter((o) => FIELD_ROLES.includes(o.value)) : roleOptions.filter((o) => !FIELD_ROLES.includes(o.value))}
+            selected={roles}
+            onChange={setRoles}
           />
-        </label>
-      )}
-      <label className="text-sm">
-        Phone
-        <input value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1 w-full rounded border border-slate-300 px-2 py-1.5" />
-      </label>
-      <label className="text-sm">
-        WhatsApp
-        <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="mt-1 w-full rounded border border-slate-300 px-2 py-1.5" />
-      </label>
-      <div className="md:col-span-2">
-        <Checkboxes
-          label="Roles"
-          options={loginKind === "pin" ? roleOptions.filter((o) => FIELD_ROLES.includes(o.value)) : roleOptions}
-          selected={roles}
-          onChange={setRoles}
-        />
-      </div>
-      {loginKind === "email" && (
-        <div className="md:col-span-2">
-          <Checkboxes label="Firms this person can see" options={firmOptions} selected={firmIds} onChange={setFirmIds} />
-        </div>
-      )}
-      <div className="md:col-span-2">
-        <button disabled={pending} className="rounded-md bg-brand px-4 py-2 text-sm text-white disabled:opacity-50">
-          {pending ? "Saving…" : "Save user"}
-        </button>
-        <p className="mt-2 text-xs text-slate-500">Field users get their beats when beats are set up (slice 0.3).</p>
-      </div>
-    </form>
+          {loginKind === "email" && (
+            <Chips label="Firms this person can see" options={firmOptions} selected={firmIds} onChange={setFirmIds} />
+          )}
+
+          <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+            <p className="text-xs text-slate-500">Field users get their beats once beats are set up.</p>
+            <Button disabled={pending}>{pending ? "Saving…" : "Save user"}</Button>
+          </div>
+        </form>
+      </CardBody>
+    </Card>
   );
 }
 
@@ -267,98 +292,119 @@ function UserRowView({
   roleOptions: { value: AppRole; label: string }[];
   firmOptions: { value: string; label: string }[];
   onEdit: () => void;
-  run: (fn: () => Promise<{ error?: string; warning?: string }>, ok: string, after?: () => void) => void;
+  run: Run;
 }) {
   const [roles, setRoles] = useState<AppRole[]>(u.roles as AppRole[]);
   const [firmIds, setFirmIds] = useState<string[]>(u.firmIds);
   const [newPin, setNewPin] = useState("");
   const locked = u.locked_until && new Date(u.locked_until) > new Date();
 
+  const status = !u.active ? (
+    <Badge>Inactive</Badge>
+  ) : !u.auth_user_id ? (
+    <Badge tone="amber">{u.login_kind === "email" ? "Invite pending" : "Login not set up"}</Badge>
+  ) : locked ? (
+    <Badge tone="red">Locked until {formatDateTime(u.locked_until!)}</Badge>
+  ) : (
+    <Badge tone="green">Active</Badge>
+  );
+
   return (
     <>
-      <tr className="border-t border-slate-100 align-top">
-        <td className="px-3 py-2 font-medium">
-          {u.full_name}
-          {isMe && <span className="ml-1 text-xs text-slate-500">(you)</span>}
-        </td>
-        <td className="px-3 py-2">{u.login_kind === "pin" ? "PIN" : u.email}</td>
-        <td className="px-3 py-2">{u.roles.map((r) => roleLabels[r]?.en ?? r).join(", ")}</td>
-        <td className="px-3 py-2">
-          {u.firmIds.map((id) => firms.find((f) => f.id === id)?.code).filter(Boolean).join(", ") || "—"}
-        </td>
-        <td className="px-3 py-2">
-          {!u.active ? (
-            <span className="text-slate-500">Inactive</span>
-          ) : !u.auth_user_id ? (
-            <span className="text-amber-700">{u.login_kind === "email" ? "Invite pending" : "Login not set up"}</span>
-          ) : locked ? (
-            <span className="text-red-700">Locked until {formatDateTime(u.locked_until!)}</span>
+      <TR className={cn(editing && "bg-slate-50", !u.active && "opacity-60")}>
+        <TD>
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
+              {u.full_name.slice(0, 1).toUpperCase()}
+            </span>
+            <div>
+              <div className="font-medium text-slate-900">
+                {u.full_name}
+                {isMe && <span className="ml-1 text-xs font-normal text-slate-500">(you)</span>}
+              </div>
+              <div className="text-xs text-slate-500">{u.phone ?? u.whatsapp ?? ""}</div>
+            </div>
+          </div>
+        </TD>
+        <TD>
+          {u.login_kind === "pin" ? (
+            <span className="inline-flex items-center gap-1.5 text-slate-600">
+              <Smartphone className="h-4 w-4 text-slate-400" /> PIN
+            </span>
           ) : (
-            <span className="text-green-700">Active</span>
+            <span className="inline-flex items-center gap-1.5 text-slate-600">
+              <Mail className="h-4 w-4 text-slate-400" /> {u.email}
+            </span>
           )}
-        </td>
-        <td className="px-3 py-2 text-right">
-          <button onClick={onEdit} className="text-sm underline">
+        </TD>
+        <TD>
+          <div className="flex flex-wrap gap-1">
+            {u.roles.map((r) => (
+              <Badge key={r} tone={r === "owner" ? "green" : "neutral"}>
+                {roleLabels[r]?.en ?? r}
+              </Badge>
+            ))}
+          </div>
+        </TD>
+        <TD className="text-slate-600">
+          {u.firmIds.map((id) => firms.find((f) => f.id === id)?.code).filter(Boolean).join(", ") || "—"}
+        </TD>
+        <TD>{status}</TD>
+        <TD className="text-right">
+          <Button variant="ghost" size="sm" onClick={onEdit}>
             {editing ? "Close" : "Edit"}
-          </button>
-        </td>
-      </tr>
+          </Button>
+        </TD>
+      </TR>
       {editing && (
-        <tr className="bg-slate-50">
-          <td colSpan={6} className="space-y-3 px-3 py-3">
-            <Checkboxes
+        <tr className="border-b border-slate-100 bg-slate-50">
+          <td colSpan={6} className="space-y-4 px-4 pb-5 pt-1">
+            <Chips
               label="Roles"
               options={u.login_kind === "pin" ? roleOptions.filter((o) => FIELD_ROLES.includes(o.value)) : roleOptions}
               selected={roles}
               onChange={setRoles}
             />
-            {u.login_kind === "email" && (
-              <Checkboxes label="Firms" options={firmOptions} selected={firmIds} onChange={setFirmIds} />
-            )}
+            {u.login_kind === "email" && <Chips label="Firms" options={firmOptions} selected={firmIds} onChange={setFirmIds} />}
             <div className="flex flex-wrap items-end gap-2">
-              <button
-                disabled={pending}
-                onClick={() => run(() => updateAccess(u.id, roles, firmIds), "Access updated")}
-                className="rounded-md bg-brand px-3 py-1.5 text-sm text-white disabled:opacity-50"
-              >
+              <Button size="sm" disabled={pending} onClick={() => run(() => updateAccess(u.id, roles, firmIds), "Access updated")}>
                 Save access
-              </button>
+              </Button>
               {u.login_kind === "pin" && (
-                <>
-                  <input
+                <div className="flex items-center gap-2">
+                  <Input
                     inputMode="numeric"
                     maxLength={4}
                     placeholder="New PIN"
                     value={newPin}
                     onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
-                    className="w-24 rounded border border-slate-300 px-2 py-1.5 text-sm"
+                    className="num h-8 w-28"
                   />
-                  <button
+                  <Button
+                    size="sm"
+                    variant="secondary"
                     disabled={pending || newPin.length !== 4}
                     onClick={() => run(() => setPin(u.id, newPin), "PIN changed and lock cleared", () => setNewPin(""))}
-                    className="rounded-md border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50"
                   >
-                    Reset PIN
-                  </button>
-                </>
+                    <KeyRound className="h-4 w-4" /> Reset PIN
+                  </Button>
+                </div>
               )}
               {!u.auth_user_id && (
-                <button
-                  disabled={pending}
-                  onClick={() => run(() => retryLogin(u.id), "Login set up")}
-                  className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-                >
+                <Button size="sm" variant="secondary" disabled={pending} onClick={() => run(() => retryLogin(u.id), "Login set up")}>
                   {u.login_kind === "email" ? "Send invite again" : "Set up login"}
-                </button>
+                </Button>
               )}
               {!isMe && (
-                <button
+                <Button
+                  size="sm"
+                  variant="danger"
+                  className="ml-auto"
                   disabled={pending}
                   onClick={() => run(() => setActive(u.id, !u.active), u.active ? "Deactivated" : "Reactivated")}
-                  className="rounded-md border border-red-300 px-3 py-1.5 text-sm text-red-700"
                 >
                   {u.active ? "Deactivate" : "Reactivate"}
-                </button>
+                </Button>
               )}
             </div>
           </td>

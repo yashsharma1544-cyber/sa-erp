@@ -15,7 +15,7 @@ export default async function PinLoginPage() {
     users = [];
   }
   return (
-    <main className="flex min-h-screen justify-center bg-slate-50 p-4">
+    <main className="flex min-h-screen justify-center bg-slate-50 px-4 py-10">
       <PinLoginForm users={users} initialLocale={locale} />
     </main>
   );

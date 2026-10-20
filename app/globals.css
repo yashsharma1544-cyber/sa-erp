@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-html { -webkit-text-size-adjust: 100%; }
-body { @apply bg-slate-50 text-slate-900 antialiased; }
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body { @apply bg-slate-100/70 text-slate-900 antialiased; }
+  ::selection { @apply bg-brand-200; }
+}
+
 .num { font-variant-numeric: tabular-nums; }
