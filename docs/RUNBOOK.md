@@ -32,7 +32,6 @@ Done so far: steps 1–3 (Supabase project `lkyevpdxhayuyvvnypmi`, migrations 00
      - `NEXT_PUBLIC_SUPABASE_URL`
      - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
      - `SUPABASE_SERVICE_ROLE_KEY`
-     - `NEXT_PUBLIC_APP_URL`
      - `FIELD_AUTH_SECRET`: a random string of 32 or more characters. To generate one in PowerShell:
        `[Convert]::ToBase64String((1..48 | ForEach-Object { Get-Random -Max 256 }))`
 

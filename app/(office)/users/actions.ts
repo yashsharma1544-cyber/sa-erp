@@ -28,6 +28,13 @@ const NewUser = z
 
 export type NewUserInput = z.input<typeof NewUser>;
 
+/** Public address of the app. NEXT_PUBLIC_APP_URL if set, else Vercel's own production URL. */
+function appUrl(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  return "http://localhost:3000";
+}
+
 function done(): Result {
   revalidatePath("/users");
   return {};
@@ -71,7 +78,7 @@ async function provisionLogin(userId: string): Promise<Result> {
     return linkError ? { error: linkError.message } : {};
   }
 
-  const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/auth/callback?next=/`;
+  const redirectTo = `${appUrl()}/auth/callback?next=/`;
   const invited = await admin.auth.admin.inviteUserByEmail(u.email!, { redirectTo });
   // The on-insert trigger links a brand-new auth user by email. If the email
   // already had an auth account, link it here.
