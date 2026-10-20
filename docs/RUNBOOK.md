@@ -13,7 +13,7 @@ npm test            # unit tests (formatting, JC calendar)
 
 ## First-time setup
 
-Done so far: steps 1–3 (Supabase project `lkyevpdxhayuyvvnypmi`, migrations 0001–0003, owner bootstrap).
+Done so far: steps 1–3 (Supabase project `lkyevpdxhayuyvvnypmi`, migrations 0001–0003, owner bootstrap) and step 5 (Vercel: https://sa-erp-blond.vercel.app). Remaining: step 4 (Auth URLs) and your first sign-in.
 
 1. **Supabase project.** Create a new project in region Mumbai (`ap-south-1`).
 2. **Migrations.** In Supabase → SQL Editor, run each file in `supabase/migrations/` **in filename order**. Run one file at a time and wait for "Success" before starting the next.
