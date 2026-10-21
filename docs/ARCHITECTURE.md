@@ -249,7 +249,7 @@ Rules that apply on top of the table:
 |---|---|
 | **tsv2 pull** | A Vercel cron (every 10 minutes from 07:00 to 22:00 IST) calls `/api/sync/tally`. It reads `tsv2` through a dedicated read-only Postgres role (`erp_reader`, `SELECT` only on `tsv2`) and upserts into the `tally.*` mirror. The mirror is idempotent and keyed on tsv2 ids, and the pull never writes to `tally-data`. You create `erp_reader` with SQL I'll give you, and nothing runs until you approve it. |
 | **WATi** | A server-side client with the token in Vercel env. Uses Marathi templates only, and every send is logged in `wa_messages`. Receipt PDFs are rendered with `@react-pdf/renderer`, stored in Supabase Storage, and linked by a signed URL. |
-| **Rupyz** | Read-only during the transition: orders captured in Rupyz are pulled into `orders` with source `rupyz` until the salesman app replaces it. |
+| **Rupyz** | Not synced (D-55). Orders enter the ERP only through the ERP order screens (Phase 2). |
 | **mondha-pos** | Phase 2: either its sales are pulled into the ERP, or Mondha billing moves into the ERP counter screen. To be decided with you then. |
 | **Tally push** | Later: XML import of Anjali bills, receipts and credit notes through a LAN agent. Each push is logged and checked by reading the voucher back through TallySync. |
 
@@ -324,7 +324,7 @@ Every slice must:
 | 1.3 | Cash handover per collector with denominations, per-person short/excess, then deposit slip with variance |
 | 1.4 | Cheque lifecycle, bounce (reversal + ₹500 charge + owner alert), Tally match screen for ERP receipts |
 | 1.5 | WATi: Marathi receipt with PDF, reminder ladder, promise reminders (templates approved by you) |
-| 1.6 | Credit limits/days per customer per firm, `credit_check()`, approval queue live for Rupyz-imported orders |
+| 1.6 | Credit limits/days per customer per firm, `credit_check()`, approval queue for orders that fail it (orders come from the ERP itself, D-55) |
 | 1.7 | Owner dashboard: collected today/JC, to collect, by collector/beat/territory, promises due today |
 | 1.8 | Import of live sa-collections data (`ca_payments`, promises, handovers), then sa-collections retired |
 

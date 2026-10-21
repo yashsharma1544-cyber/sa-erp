@@ -20,9 +20,6 @@ export default async function OfficeLayout({ children }: { children: React.React
       items: [
         { href: "/", label: "Home", icon: "home" },
         { href: "/approvals", label: "Approvals", icon: "approvals", badge: pendingApprovals ?? 0 },
-        ...(can(me, "order.approve") || can(me, "credit.manage")
-          ? [{ href: "/rupyz-orders", label: "Rupyz orders", icon: "orders" as const }]
-          : []),
       ],
     },
     {

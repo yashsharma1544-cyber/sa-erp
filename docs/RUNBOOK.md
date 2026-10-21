@@ -157,17 +157,6 @@ needs to be keyed into Tally.
 5. To try a figure for one customer, open the customer page and use
    **Credit check** under the firm account.
 
-## Rupyz orders
-
-- **Approvals** lists held orders with the reasons and figures. The sales
-  admin can approve, except for bad-debt customers (owner only).
-- **Rupyz orders** has tabs for held, not linked, passed, approved and
-  rejected orders. **Link** connects a Rupyz customer to the ERP customer
-  once. **Recheck held & unlinked** re-runs the check after payments or new
-  terms.
-- The feed isn't connected yet (Q-9). To load orders by hand, the owner can
-  run this in the Supabase SQL editor of `sa-erp`:
-  `select public.intake_rupyz_orders('[{"order_id":"…","customer_id":"…","customer_name":"…","total_amount":1234,"order_date":"2026-10-21","salesman_name":"…"}]');`
 
 ## Adding a new financial year
 
