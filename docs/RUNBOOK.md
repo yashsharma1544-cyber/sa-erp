@@ -142,9 +142,32 @@ needs to be keyed into Tally.
    one ends with the receipt link.
 3. Once WhatsApp approves a template, type its WATi name on that screen, tick
    **Approved** and **Switched on**, and save. Start with the receipt.
-4. Keep the **reminder ladder** off until credit days are set (slice 1.6).
+4. Keep the **reminder ladder** off until credit days are set on **Masters → Credit terms**.
 5. Turn off WhatsApp for a customer with the checkbox under WhatsApp on their
    customer page.
+
+## Credit terms and the credit check
+
+1. Open **Masters → Credit terms** and pick the firm (Sushil / Anjali).
+2. Choose **Terms not set**, narrow by territory or beat, tick the header box
+   to select all shown, type the limit and/or days, and press **Set for
+   selected**. Leave a box blank to keep what each customer already has.
+3. A 0 limit or 0 days means that rule isn't checked yet (D-51).
+4. Grace days: **Firms & settings → credit_grace_days** (default 0).
+5. To try a figure for one customer, open the customer page and use
+   **Credit check** under the firm account.
+
+## Rupyz orders
+
+- **Approvals** lists held orders with the reasons and figures. The sales
+  admin can approve, except for bad-debt customers (owner only).
+- **Rupyz orders** has tabs for held, not linked, passed, approved and
+  rejected orders. **Link** connects a Rupyz customer to the ERP customer
+  once. **Recheck held & unlinked** re-runs the check after payments or new
+  terms.
+- The feed isn't connected yet (Q-9). To load orders by hand, the owner can
+  run this in the Supabase SQL editor of `sa-erp`:
+  `select public.intake_rupyz_orders('[{"order_id":"…","customer_id":"…","customer_name":"…","total_amount":1234,"order_date":"2026-10-21","salesman_name":"…"}]');`
 
 ## Adding a new financial year
 

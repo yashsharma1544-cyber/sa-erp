@@ -20,6 +20,9 @@ export default async function OfficeLayout({ children }: { children: React.React
       items: [
         { href: "/", label: "Home", icon: "home" },
         { href: "/approvals", label: "Approvals", icon: "approvals", badge: pendingApprovals ?? 0 },
+        ...(can(me, "order.approve") || can(me, "credit.manage")
+          ? [{ href: "/rupyz-orders", label: "Rupyz orders", icon: "orders" as const }]
+          : []),
       ],
     },
     {
@@ -40,6 +43,7 @@ export default async function OfficeLayout({ children }: { children: React.React
       title: "Masters",
       items: [
         { href: "/customers", label: "Customers", icon: "customers" },
+        ...(can(me, "credit.manage") ? [{ href: "/credit", label: "Credit terms", icon: "credit" as const }] : []),
         { href: "/beats", label: "Beats & territories", icon: "beats" },
         { href: "/items", label: "Items", icon: "items" },
         ...(me.roles.some((r) => r !== "salesman" && r !== "collector" && r !== "driver")

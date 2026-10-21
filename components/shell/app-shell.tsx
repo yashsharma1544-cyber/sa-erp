@@ -8,6 +8,8 @@ import {
   Building,
   FileCheck2,
   FileInput,
+  Gauge,
+  ShoppingCart,
   GitCompareArrows,
   IndianRupee,
   CalendarDays,
@@ -49,7 +51,9 @@ export type NavIcon =
   | "cash"
   | "cheques"
   | "match"
-  | "whatsapp";
+  | "whatsapp"
+  | "credit"
+  | "orders";
 export type NavItem = { href: string; label: string; icon: NavIcon; badge?: number };
 export type NavSection = { title?: string; items: NavItem[] };
 
@@ -72,6 +76,8 @@ const icons: Record<NavIcon, LucideIcon> = {
   cheques: FileCheck2,
   match: GitCompareArrows,
   whatsapp: MessageCircle,
+  credit: Gauge,
+  orders: ShoppingCart,
 };
 
 function initials(name: string) {

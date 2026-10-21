@@ -16,6 +16,7 @@ export async function decide(id: string, approve: boolean, note: string): Promis
   });
   if (error) return { error: error.message };
   revalidatePath("/approvals");
+  revalidatePath("/rupyz-orders");
   return {};
 }
 

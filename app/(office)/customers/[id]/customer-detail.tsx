@@ -11,6 +11,7 @@ import { Alert, Field, Input, Select } from "@/components/ui/field";
 import { CustomerForm } from "../customer-form";
 import { statusBadge } from "../customers-client";
 import { saveCustomer, saveFirmAccount, setCustomerStatus, type CustomerInput, type FirmAccountInput } from "../actions";
+import { checkCredit, type CreditCheck } from "../../credit/actions";
 
 export type Customer = {
   id: string;
@@ -238,6 +239,7 @@ function FirmAccountCard({
             </Button>
           </form>
         )}
+        {account && <CreditCheckBox firmId={firm.id} customerId={customerId} />}
       </CardBody>
     </Card>
   );
@@ -273,5 +275,51 @@ function StatusCard({
         </Button>
       </CardBody>
     </Card>
+  );
+}
+
+function CreditCheckBox({ firmId, customerId }: { firmId: string; customerId: string }) {
+  const [amount, setAmount] = useState("");
+  const [res, setRes] = useState<{ error?: string; result?: CreditCheck } | null>(null);
+  const [pending, start] = useTransition();
+  const r = res?.result;
+  return (
+    <div className="mt-4 border-t border-slate-100 pt-4">
+      <form
+        className="flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          start(async () => setRes(await checkCredit(firmId, customerId, amount || "0")));
+        }}
+      >
+        <Input inputMode="decimal" placeholder="Order amount ₹" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))} className="num" />
+        <Button size="sm" variant="secondary" disabled={pending}>
+          Credit check
+        </Button>
+      </form>
+      {res?.error && <p className="mt-2 text-xs text-red-700">{res.error}</p>}
+      {r && (
+        <div className="mt-2 space-y-1 text-xs text-slate-600">
+          <Badge tone={r.ok ? "green" : "red"}>{r.ok ? "Passes" : "Needs approval"}</Badge>
+          {r.reasons.map((x) => (
+            <div key={x.code} className="text-red-700">
+              {x.text}
+            </div>
+          ))}
+          <div>
+            Outstanding {formatINR(r.outstanding ?? 0)}
+            {Number(r.unposted_receipts) > 0 && <> (after {formatINR(r.unposted_receipts ?? 0)} collected, not in Tally yet)</>}
+            {r.available != null && <> · available {formatINR(r.available)}</>}
+          </div>
+          {r.oldest_bill_date && (
+            <div>
+              Oldest unpaid bill {r.oldest_bill_no} of {formatDate(r.oldest_bill_date)} · {r.oldest_days} days
+            </div>
+          )}
+          {r.oldest_is_older_than_records && <div>Has a bill older than Tally records</div>}
+          {!r.terms_set && <div className="text-amber-700">No credit terms set, so only bad-debt status is checked.</div>}
+        </div>
+      )}
+    </div>
   );
 }

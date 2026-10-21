@@ -23,7 +23,12 @@ export type ApprovalRow = {
   created_at: string;
   decided_at: string | null;
   decision_note: string | null;
-  requested_by: string;
+  requested_by: string | null;
+  subject_table: string | null;
+  details: {
+    salesman?: string;
+    credit?: { outstanding?: number; credit_limit?: number; oldest_days?: number | null; credit_days?: number };
+  } | null;
   firm_code: string;
   requester_name: string;
   decider_name: string | null;
@@ -98,6 +103,14 @@ export function ApprovalsClient({
                   {r.is_bad_debt && <Badge tone="red">Bad debt</Badge>}
                 </div>
                 <p className="mt-1 text-sm text-slate-600">{r.reason}</p>
+                {r.details?.credit && (
+                  <p className="mt-1 text-xs text-slate-500">
+                    Outstanding {formatINR(r.details.credit.outstanding ?? 0)}
+                    {Number(r.details.credit.credit_limit) > 0 && <> · limit {formatINR(r.details.credit.credit_limit ?? 0)}</>}
+                    {r.details.credit.oldest_days != null && <> · oldest bill {r.details.credit.oldest_days} days</>}
+                    {Number(r.details.credit.credit_days) > 0 && <> · credit days {r.details.credit.credit_days}</>}
+                  </p>
+                )}
                 <p className="mt-1 text-xs text-slate-500">
                   Asked by {r.requester_name} · {formatDateTime(r.created_at)}
                 </p>
