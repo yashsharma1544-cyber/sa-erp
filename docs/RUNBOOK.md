@@ -49,6 +49,44 @@ To finish it, open **Admin → Import from Tally**:
 
 Then open **Customers** and give a beat to customers that have none.
 
+## Connect TallySync (one-time)
+
+The ERP keeps a read-only copy of TallySync (D-37). The `erp_reader` role
+already exists in **tally-data**. It can only read 6 tsv2 tables and can't
+log in until it has a password. Pick a long password (letters and digits, no
+quotes) and use it in both steps. Never put it in Git or a chat.
+
+1. Supabase → **tally-data** → SQL Editor:
+
+   ```sql
+   alter role erp_reader with login password 'YOUR-LONG-PASSWORD';
+   ```
+
+2. Supabase → **sa-erp** → SQL Editor (the first sync copies everything and
+   takes a minute or two):
+
+   ```sql
+   select tally.connect_source('db.zrdvmgxnmcqnxvlitonz.supabase.co', 5432, 'postgres', 'erp_reader', 'YOUR-LONG-PASSWORD');
+   select tally.run_sync();
+   ```
+
+   The result should say `"status": "ok"`. If it says the server can't be
+   reached, open tally-data → **Connect** → **Session pooler**, and run
+   `connect_source` again with that host, and with user
+   `erp_reader.zrdvmgxnmcqnxvlitonz`.
+
+3. Turn on the schedule (sa-erp → SQL Editor). It runs every 10 minutes from
+   06:30 to 22:20 IST, plus a full re-check at 03:00 IST:
+
+   ```sql
+   select cron.schedule('tally-sync', '*/10 1-16 * * *', 'select tally.run_sync(false)');
+   select cron.schedule('tally-sync-full', '30 21 * * *', 'select tally.run_sync(true)');
+   ```
+
+   To stop it: `select cron.unschedule('tally-sync'); select cron.unschedule('tally-sync-full');`
+
+The status and a **Sync now** button are on **Setup → Firms & settings**.
+
 ## Adding a new financial year
 
 Each March, open **JC calendar** → **+ Generate FY xx-yy** (owner only). The SQL alternative is `select public.generate_journey_cycles(2027);`.
