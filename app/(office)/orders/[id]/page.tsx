@@ -8,7 +8,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const supabase = await createClient();
-  const [{ data: order }, { data: lines }, { data: events }, { data: approvals }] = await Promise.all([
+  const [{ data: order }, { data: lines }, { data: events }, { data: approvals }, { data: bills }] = await Promise.all([
     supabase
       .from("orders")
       .select(
@@ -19,7 +19,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       .maybeSingle(),
     supabase
       .from("order_lines")
-      .select("id, line_no, unit, qty, kg, list_rate, rate, gst_rate, taxable, gst, amount, item:items(name, unit, pack_size_g)")
+      .select("id, line_no, unit, qty, kg, list_rate, rate, gst_rate, taxable, gst, amount, qty_invoiced, item:items(name, unit, pack_size_g)")
       .eq("order_id", id)
       .is("deleted_at", null)
       .order("line_no"),
@@ -34,6 +34,12 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       .eq("subject_table", "orders")
       .eq("subject_id", id)
       .order("created_at"),
+    supabase
+      .from("invoices")
+      .select("id, invoice_no, invoice_date, total, link_method, lines:invoice_lines(item_name, qty_text, qty, amount)")
+      .eq("order_id", id)
+      .is("deleted_at", null)
+      .order("invoice_date"),
   ]);
   if (!order) notFound();
   return (
@@ -42,6 +48,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       lines={(lines ?? []) as unknown as OrderView["lines"]}
       events={(events ?? []) as unknown as OrderView["events"]}
       approvals={(approvals ?? []) as unknown as OrderView["approvals"]}
+      bills={(bills ?? []) as unknown as OrderView["bills"]}
       canCancel={can(me, "order.create")}
     />
   );

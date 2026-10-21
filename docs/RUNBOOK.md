@@ -253,6 +253,18 @@ needs to be keyed into Tally.
 - To cancel, open the order → **Cancel order**, with a reason. This is only
   possible until loading starts.
 
+## Tally bills
+
+- Keep billing in Tally as usual (both firms). After each Tally sync (every
+  10 minutes in the day), the ERP links each new sales bill to the open order
+  of that customer, and the order becomes **Invoiced**. The order page shows
+  the **Billed** quantity per line and the linked bills under **Tally bills**.
+- If a bill went to the wrong order, press **Unlink** on it. To link one by
+  hand, open the order → **Tally bills** → pick the bill from the list.
+- A bill is linked only if the customer is the same ledger in Tally and the
+  order is from up to 10 days before the bill. Check the customer's Tally
+  ledger if a bill doesn't link.
+
 ## Dispatch
 
 1. Add vehicles once: **Masters → Vehicles**, with capacity in kg. Add

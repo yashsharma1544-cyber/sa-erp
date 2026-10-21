@@ -11,7 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, Input } from "@/components/ui/field";
 import { TD, TH, THead, TR, Table } from "@/components/ui/table";
 import type { CreditCheck } from "../../credit/actions";
-import { cancelOrder } from "../actions";
+import { billCandidates, cancelOrder, linkBill, unlinkBill, type BillCandidate } from "../actions";
+import { cn } from "@/lib/utils";
 import { SOURCE_LABEL, STATUS_LABEL, STATUS_TONE, type OrderStatus } from "../status";
 import { packetsFor } from "@/lib/orders/packets";
 
@@ -26,18 +27,20 @@ export type OrderView = {
   };
   lines: {
     id: string; line_no: number; unit: string; qty: string; kg: string; list_rate: string | null; rate: string;
-    gst_rate: string; taxable: string; gst: string; amount: string; item: { name: string; unit: string; pack_size_g: string | null };
+    gst_rate: string; taxable: string; gst: string; amount: string; qty_invoiced: string; item: { name: string; unit: string; pack_size_g: string | null };
   }[];
   events: { id: string; from_status: string | null; to_status: OrderStatus; note: string | null; at: string; by: { full_name: string } | null }[];
   approvals: {
     id: string; kind: string; status: string; reason: string; amount: string; decision_note: string | null;
     decided_at: string | null; decider: { full_name: string } | null;
   }[];
+  bills: { id: string; invoice_no: string; invoice_date: string; total: string; link_method: string | null;
+           lines: { item_name: string; qty_text: string | null; qty: string; amount: string }[] }[];
 };
 
 const APPROVAL_TONE = { pending: "amber", approved: "green", rejected: "red", cancelled: "neutral" } as const;
 
-export function OrderDetail({ order: o, lines, events, approvals, canCancel }: OrderView & { canCancel: boolean }) {
+export function OrderDetail({ order: o, lines, events, approvals, bills, canCancel }: OrderView & { canCancel: boolean }) {
   const router = useRouter();
   const [reason, setReason] = useState("");
   const [showCancel, setShowCancel] = useState(false);
@@ -87,6 +90,7 @@ export function OrderDetail({ order: o, lines, events, approvals, canCancel }: O
                 <TH>Item</TH>
                 <TH className="text-right">Qty</TH>
                 <TH className="text-right">Weight</TH>
+                {bills.length > 0 && <TH className="text-right">Billed</TH>}
                 <TH className="text-right">Rate</TH>
                 <TH className="text-right">Taxable</TH>
                 {o.firm.gst_registered && <TH className="text-right">GST</TH>}
@@ -111,6 +115,11 @@ export function OrderDetail({ order: o, lines, events, approvals, canCancel }: O
                     )}
                   </TD>
                   <TD className="num text-right">{Number(l.kg) > 0 ? formatKg(l.kg) : "—"}</TD>
+                  {bills.length > 0 && (
+                    <TD className={cn("num text-right", Number(l.qty_invoiced) < Number(l.qty) && "text-amber-700")}>
+                      {Number(l.qty_invoiced)} {l.unit}
+                    </TD>
+                  )}
                   <TD className="num text-right">
                     {formatINR(l.rate)}
                     {l.list_rate && Number(l.rate) < Number(l.list_rate) && (
@@ -173,6 +182,8 @@ export function OrderDetail({ order: o, lines, events, approvals, canCancel }: O
               )}
             </CardBody>
           </Card>
+
+          <BillsCard orderId={o.id} bills={bills} canLink={canCancel && !["cancelled", "rejected"].includes(o.status)} />
 
           {approvals.length > 0 && (
             <Card>
@@ -253,5 +264,70 @@ export function OrderDetail({ order: o, lines, events, approvals, canCancel }: O
         </div>
       </div>
     </div>
+  );
+}
+
+function BillsCard({ orderId, bills, canLink }: { orderId: string; bills: OrderView["bills"]; canLink: boolean }) {
+  const router = useRouter();
+  const [cands, setCands] = useState<BillCandidate[] | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  const run = (fn: () => Promise<{ error?: string }>) =>
+    start(async () => {
+      const r = await fn();
+      setErr(r.error ?? null);
+      if (!r.error) {
+        setCands(null);
+        router.refresh();
+      }
+    });
+  return (
+    <Card>
+      <CardHeader title="Tally bills" description={bills.length ? undefined : "Linked by itself after the Tally sync once the bill is made"} />
+      <CardBody className="space-y-3 text-sm">
+        {err && <p className="text-xs text-red-700">{err}</p>}
+        {bills.map((b) => (
+          <div key={b.id}>
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-medium">{b.invoice_no}</span>
+              <span className="num">{formatINR(b.total)}</span>
+            </div>
+            <div className="text-xs text-slate-500">
+              {formatDate(b.invoice_date)} · {b.link_method === "manual" ? "linked by hand" : "linked automatically"}
+              {canLink && (
+                <button className="ml-2 text-red-700 underline" disabled={pending} onClick={() => run(() => unlinkBill(orderId, b.id))}>
+                  unlink
+                </button>
+              )}
+            </div>
+            <div className="text-xs text-slate-500">{b.lines.map((l) => `${l.item_name} ${l.qty_text ?? Number(l.qty)}`).join("; ")}</div>
+          </div>
+        ))}
+        {canLink && cands === null && (
+          <Button size="sm" variant="secondary" disabled={pending} onClick={() => start(async () => setCands(await billCandidates(orderId)))}>
+            Link a Tally bill
+          </Button>
+        )}
+        {cands && (
+          <div className="space-y-2 border-t border-slate-100 pt-2">
+            {cands.length === 0 && <p className="text-xs text-slate-500">No unlinked Tally bills for this customer around the order date.</p>}
+            {cands.map((c) => (
+              <button
+                key={c.voucher_id}
+                disabled={pending}
+                onClick={() => run(() => linkBill(orderId, c.voucher_id))}
+                className="block w-full rounded-lg px-2 py-1.5 text-left hover:bg-slate-50"
+              >
+                <div className="flex justify-between">
+                  <span className="font-medium">{c.voucher_no} · {formatDate(c.voucher_date)}</span>
+                  <span className="num">{formatINR(c.total)}</span>
+                </div>
+                <div className="text-xs text-slate-500">{c.party_name} · {c.lines}</div>
+              </button>
+            ))}
+          </div>
+        )}
+      </CardBody>
+    </Card>
   );
 }

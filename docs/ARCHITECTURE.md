@@ -342,7 +342,7 @@ The salesman order app has history and kg. Office entry and WhatsApp paste parsi
 - partial fulfilment;
 - dispatch planning by route day (city same/next day, outstation weekday);
 - vehicle and driver assignment, loading sheet;
-- Anjali bills from the ERP, Sushil invoices linked from Tally;
+- Tally bills of both firms linked back to orders (D-73);
 - driver app with POD and COD;
 - status board;
 - Tally XML push of Anjali bills.
@@ -354,7 +354,7 @@ The salesman order app has history and kg. Office entry and WhatsApp paste parsi
 | 2.3 | Orders from the salesmen's WhatsApp groups (owner's Whatsapp Orders project) synced every 5 minutes, placed automatically or checked on WhatsApp orders (D-63…D-66) |
 | 2.3b | Mondha counter orders |
 | 2.4 | Dispatch planning by route day, vehicle/driver, loading sheet (D-71, D-72); oil out of the ERP (D-70) |
-| 2.5 | Anjali bills from the ERP; Sushil Tally invoices linked back to orders |
+| 2.5 | Tally bills of both firms linked back to orders, invoiced status (D-73, D-74); ERP billing of Anjali left for 2.7 if wanted |
 | 2.6 | Driver app: proof of delivery, cash on delivery |
 | 2.7 | Status board; Tally XML push of Anjali bills |
 | later | Rupyz order intake, if still needed (D-62) |

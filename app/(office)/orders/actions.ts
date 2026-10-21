@@ -114,3 +114,35 @@ export async function learnItemAliases(rows: { itemId: string; text: string }[])
   const supabase = await createClient();
   await supabase.rpc("learn_item_aliases", { p: valid.map((r) => ({ item_id: r.itemId, text: r.text })) });
 }
+
+export type BillCandidate = { voucher_id: string; voucher_no: string; voucher_date: string; party_name: string; total: string; lines: string | null };
+
+export async function billCandidates(orderId: string): Promise<BillCandidate[]> {
+  await requireUser();
+  if (!uuid.safeParse(orderId).success) return [];
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("order_bill_candidates", { p_order_id: orderId });
+  return (data ?? []) as BillCandidate[];
+}
+
+export async function linkBill(orderId: string, voucherId: string): Promise<ActionResult> {
+  await requireUser();
+  if (!uuid.safeParse(orderId).success || !uuid.safeParse(voucherId).success) return { error: "Pick the bill" };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("link_bill", { p_order_id: orderId, p_voucher_id: voucherId });
+  if (error) return { error: friendlyError(error) };
+  revalidatePath(`/orders/${orderId}`);
+  revalidatePath("/orders");
+  return { ok: "Bill linked" };
+}
+
+export async function unlinkBill(orderId: string, invoiceId: string): Promise<ActionResult> {
+  await requireUser();
+  if (!uuid.safeParse(invoiceId).success) return { error: "Unknown bill" };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("unlink_bill", { p_invoice_id: invoiceId });
+  if (error) return { error: friendlyError(error) };
+  revalidatePath(`/orders/${orderId}`);
+  revalidatePath("/orders");
+  return { ok: "Bill unlinked" };
+}
