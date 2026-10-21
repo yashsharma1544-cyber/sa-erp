@@ -128,6 +128,24 @@ Most match by themselves after each sync. For the rest, press **Find in
 Tally** and pick the right voucher. Anything waiting more than 2 days still
 needs to be keyed into Tally.
 
+## WhatsApp (WATi)
+
+1. **Vercel → sa-erp → Settings → Environment Variables** (Production), then
+   redeploy:
+   - `WATI_API_ENDPOINT`: from WATi → API Docs, e.g.
+     `https://live-mt-server.wati.io/123456`
+   - `WATI_API_TOKEN`: the access token from the same page
+   - `CRON_SECRET`: any long random text (the daily 9 am job needs it)
+2. In **WATi → Template Messages**, create the four templates (Marathi,
+   Utility). Copy each text exactly from **Collections → WhatsApp →
+   Templates & reminders**, including the `{{1}}`… placeholders. The receipt
+   one ends with the receipt link.
+3. Once WhatsApp approves a template, type its WATi name on that screen, tick
+   **Approved** and **Switched on**, and save. Start with the receipt.
+4. Keep the **reminder ladder** off until credit days are set (slice 1.6).
+5. Turn off WhatsApp for a customer with the checkbox under WhatsApp on their
+   customer page.
+
 ## Adding a new financial year
 
 Each March, open **JC calendar** → **+ Generate FY xx-yy** (owner only). The SQL alternative is `select public.generate_journey_cycles(2027);`.

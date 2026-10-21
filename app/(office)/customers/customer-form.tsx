@@ -75,6 +75,10 @@ export function CustomerForm({
         </Field>
         <Field label="WhatsApp" hint="10-digit mobile; 91 prefix optional">
           <Input inputMode="tel" value={v.whatsapp ?? ""} onChange={(e) => set({ whatsapp: e.target.value })} />
+          <label className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-600">
+            <input type="checkbox" checked={!!v.waOptOut} onChange={(e) => set({ waOptOut: e.target.checked })} />
+            Don&apos;t send WhatsApp receipts or reminders
+          </label>
         </Field>
         <Field label="Phone">
           <Input inputMode="tel" value={v.phone ?? ""} onChange={(e) => set({ phone: e.target.value })} />

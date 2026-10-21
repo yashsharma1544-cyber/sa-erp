@@ -33,6 +33,7 @@ export default async function OfficeLayout({ children }: { children: React.React
           ? [{ href: "/cheques", label: "Cheques", icon: "cheques" as const }]
           : []),
         ...(can(me, "reports.view_all") ? [{ href: "/tally-match", label: "Tally match", icon: "match" as const }] : []),
+        ...(can(me, "reports.view_all") ? [{ href: "/whatsapp", label: "WhatsApp", icon: "whatsapp" as const }] : []),
       ],
     },
     {

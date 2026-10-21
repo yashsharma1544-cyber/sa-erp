@@ -1,7 +1,8 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { sendReceiptMessage } from "@/lib/whatsapp/dispatch";
 
 const Op = z.object({
   client_op_id: z.string().uuid(),
@@ -36,6 +37,11 @@ export async function POST(req: NextRequest) {
   if (error) {
     const permanent = ["22", "23", "42", "P0", "02"].some((c) => (error.code ?? "").startsWith(c));
     return NextResponse.json({ error: error.message }, { status: permanent ? 422 : 500 });
+  }
+  const result = data as { status: string; kind: string; id: string };
+  // The customer's WhatsApp receipt goes out after the phone has its answer.
+  if (result.kind === "receipt" && result.status === "created") {
+    after(() => sendReceiptMessage(result.id).catch(() => {}));
   }
   return NextResponse.json(data);
 }

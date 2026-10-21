@@ -21,6 +21,7 @@ import {
   Home,
   LogOut,
   Menu,
+  MessageCircle,
   ScrollText,
   Settings,
   ShieldCheck,
@@ -47,7 +48,8 @@ export type NavIcon =
   | "receivables"
   | "cash"
   | "cheques"
-  | "match";
+  | "match"
+  | "whatsapp";
 export type NavItem = { href: string; label: string; icon: NavIcon; badge?: number };
 export type NavSection = { title?: string; items: NavItem[] };
 
@@ -69,6 +71,7 @@ const icons: Record<NavIcon, LucideIcon> = {
   cash: Banknote,
   cheques: FileCheck2,
   match: GitCompareArrows,
+  whatsapp: MessageCircle,
 };
 
 function initials(name: string) {

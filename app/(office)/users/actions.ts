@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { appUrl } from "@/lib/app-url";
 import { z } from "zod";
 import { requirePermission, type AppRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -29,11 +30,6 @@ const NewUser = z
 export type NewUserInput = z.input<typeof NewUser>;
 
 /** Public address of the app. NEXT_PUBLIC_APP_URL if set, else Vercel's own production URL. */
-function appUrl(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
-  return "http://localhost:3000";
-}
 
 function done(): Result {
   revalidatePath("/users");

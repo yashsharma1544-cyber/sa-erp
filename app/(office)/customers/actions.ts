@@ -20,6 +20,7 @@ const Customer = z.object({
   gstin: optionalGstin,
   address: optionalText(300),
   town: optionalText(80),
+  waOptOut: z.boolean().optional(),
 });
 
 export type CustomerInput = z.input<typeof Customer>;
@@ -39,6 +40,7 @@ export async function saveCustomer(input: CustomerInput): Promise<ActionResult &
     gstin: v.gstin,
     address: v.address,
     town: v.town,
+    ...(v.waOptOut === undefined ? {} : { wa_opt_out: v.waOptOut }),
   };
   const supabase = await createClient();
   if (v.id) {

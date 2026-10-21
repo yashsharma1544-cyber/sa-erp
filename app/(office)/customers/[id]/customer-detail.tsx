@@ -19,6 +19,7 @@ export type Customer = {
   customer_type: CustomerInput["customerType"];
   beat_id: string | null;
   whatsapp: string | null;
+  wa_opt_out: boolean;
   phone: string | null;
   gstin: string | null;
   address: string | null;
@@ -63,6 +64,7 @@ export function CustomerDetail({
     customerType: c.customer_type,
     beatId: c.beat_id,
     whatsapp: c.whatsapp ?? "",
+    waOptOut: c.wa_opt_out,
     phone: c.phone ?? "",
     gstin: c.gstin ?? "",
     address: c.address ?? "",

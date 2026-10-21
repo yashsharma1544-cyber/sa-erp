@@ -14,7 +14,7 @@ export default async function CustomerPage({ params }: Props) {
   const [{ data: customer }, { data: accounts }, { data: beats }, { data: firms }] = await Promise.all([
     supabase
       .from("customers")
-      .select("id, name, display_name_mr, customer_type, beat_id, whatsapp, phone, gstin, address, town, status, status_note, created_at")
+      .select("id, name, display_name_mr, customer_type, beat_id, whatsapp, wa_opt_out, phone, gstin, address, town, status, status_note, created_at")
       .eq("id", id)
       .is("deleted_at", null)
       .maybeSingle(),
