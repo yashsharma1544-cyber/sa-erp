@@ -158,6 +158,19 @@ needs to be keyed into Tally.
    **Credit check** under the firm account.
 
 
+## Owner dashboard (Home)
+
+- The top cards show collected today, collected this JC, to collect, and
+  promises due today. The firm buttons switch between both firms, Sushil only
+  and Anjali only.
+- **By collector:** money taken in the field app, per person, plus cash still
+  in their hand. "Office / Tally" is money entered straight in Tally.
+  "Overdue in their beats" needs collection beats on **Admin → Users**.
+- **By territory / By beat:** where the money came from and where it is still
+  owed. The worst overdue is listed first.
+- A Tally receipt shows up once TallySync has sent it (every 10 minutes from
+  06:30 to 22:30).
+
 ## Adding a new financial year
 
 Each March, open **JC calendar** → **+ Generate FY xx-yy** (owner only). The SQL alternative is `select public.generate_journey_cycles(2027);`.

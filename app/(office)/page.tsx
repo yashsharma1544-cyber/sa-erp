@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, CalendarDays, CheckCircle2, IndianRupee, Target, Users, Wallet } from "lucide-react";
-import { requireUser } from "@/lib/auth";
+import { can, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatINR, formatNumber, todayIST } from "@/lib/format";
 import { jcDay } from "@/lib/jc";
@@ -8,6 +8,8 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertsCard, type AlertRow } from "./alerts-card";
+import { loadDashboard } from "./dashboard-data";
+import { OwnerDashboard } from "./owner-dashboard";
 
 function greeting(): string {
   const hour = Number(
@@ -36,6 +38,7 @@ export default async function HomePage() {
     supabase.from("alerts").select("id, title, body, created_at").is("read_at", null).is("deleted_at", null).order("created_at", { ascending: false }).limit(20),
     supabase.from("receipts").select("amount, mode").eq("collected_on", today).not("status", "in", "(cancelled,bounced)").is("deleted_at", null),
   ]);
+  const dashboard = can(me, "reports.view_all") ? await loadDashboard(today) : null;
   const collected = (todayReceipts ?? []).reduce((s, r) => s + Number(r.amount), 0);
   const collectedCash = (todayReceipts ?? []).filter((r) => r.mode === "cash").reduce((s, r) => s + Number(r.amount), 0);
 
@@ -63,7 +66,7 @@ export default async function HomePage() {
 
       {me.roles.includes("owner") && <AlertsCard alerts={(alerts ?? []) as AlertRow[]} />}
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className={`grid gap-4 sm:grid-cols-2 ${dashboard ? "xl:grid-cols-3" : "xl:grid-cols-4"}`}>
         <StatCard
           tone="brand"
           label="Journey cycle"
@@ -96,23 +99,25 @@ export default async function HomePage() {
           value={formatNumber(activeUsers ?? 0)}
           sub="Office and field logins"
         />
-        <Link href="/cash" className="block transition hover:-translate-y-0.5">
-          <StatCard
-            label="Collected today"
-            icon={<Wallet className="h-4 w-4" />}
-            value={formatINR(collected).replace(/\.00$/, "")}
-            sub={`${formatNumber((todayReceipts ?? []).length)} receipts · cash ${formatINR(collectedCash).replace(/\.00$/, "")}`}
-          />
-        </Link>
+        {!dashboard && (
+          <Link href="/cash" className="block transition hover:-translate-y-0.5">
+            <StatCard
+              label="Collected today"
+              icon={<Wallet className="h-4 w-4" />}
+              value={formatINR(collected).replace(/\.00$/, "")}
+              sub={`${formatNumber((todayReceipts ?? []).length)} receipts · cash ${formatINR(collectedCash).replace(/\.00$/, "")}`}
+            />
+          </Link>
+        )}
       </section>
+
+      {dashboard && <OwnerDashboard {...dashboard} today={today} jcDayNo={day} />}
 
       <section className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <CardHeader title="Your daily numbers" description="These fill in as each phase goes live." />
+          <CardHeader title="Coming next" description="These fill in as each phase goes live." />
           <CardBody className="grid gap-3 sm:grid-cols-2">
             {[
-              { icon: Wallet, label: "Collected today / this JC", phase: "Phase 1" },
-              { icon: IndianRupee, label: "Receivables & to collect", phase: "Phase 1" },
               { icon: Target, label: "Primary target achievement", phase: "Phase 4" },
               { icon: IndianRupee, label: "Payables & Vikram 1% discount", phase: "Phase 3" },
             ].map(({ icon: Icon, label, phase }) => (
