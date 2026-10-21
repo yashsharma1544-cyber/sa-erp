@@ -23,6 +23,10 @@ export default async function OfficeLayout({ children }: { children: React.React
       ],
     },
     {
+      title: "Collections",
+      items: can(me, "reports.view_all") ? [{ href: "/receivables", label: "Receivables", icon: "receivables" as const }] : [],
+    },
+    {
       title: "Masters",
       items: [
         { href: "/customers", label: "Customers", icon: "customers" },

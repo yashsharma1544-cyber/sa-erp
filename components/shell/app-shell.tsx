@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import {
   Building,
   FileInput,
+  IndianRupee,
   CalendarDays,
   KeyRound,
   Map,
@@ -39,7 +40,8 @@ export type NavIcon =
   | "items"
   | "suppliers"
   | "vehicles"
-  | "import";
+  | "import"
+  | "receivables";
 export type NavItem = { href: string; label: string; icon: NavIcon; badge?: number };
 export type NavSection = { title?: string; items: NavItem[] };
 
@@ -57,6 +59,7 @@ const icons: Record<NavIcon, LucideIcon> = {
   suppliers: Building,
   vehicles: Truck,
   import: FileInput,
+  receivables: IndianRupee,
 };
 
 function initials(name: string) {
@@ -142,7 +145,7 @@ export function AppShell({
   return (
     <div className="min-h-screen">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex print:!hidden">
         <div className="flex h-16 items-center border-b border-slate-100 px-5">
           <Brand />
         </div>
@@ -170,9 +173,9 @@ export function AppShell({
         </div>
       )}
 
-      <div className="lg:pl-64">
+      <div className="lg:pl-64 print:!pl-0">
         {/* Top bar */}
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-200 bg-white/90 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-20 flex h-16 print:!hidden items-center gap-3 border-b border-slate-200 bg-white/90 px-4 backdrop-blur sm:px-6">
           <button onClick={() => setOpen(true)} className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden" aria-label="Open menu">
             <Menu className="h-5 w-5" />
           </button>

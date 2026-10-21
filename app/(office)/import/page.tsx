@@ -1,17 +1,7 @@
 import { requirePermission } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { readAll } from "@/lib/supabase/read-all";
 import { ImportClient, type CustomerOption, type PartyRow } from "./import-client";
-
-// PostgREST returns at most 1,000 rows per request; read in pages.
-async function readAll<T>(fetchPage: (from: number, to: number) => PromiseLike<{ data: unknown[] | null; error: unknown }>) {
-  const rows: T[] = [];
-  for (let from = 0; ; from += 1000) {
-    const { data, error } = await fetchPage(from, from + 999);
-    if (error) throw error;
-    rows.push(...((data ?? []) as T[]));
-    if (!data || data.length < 1000) return rows;
-  }
-}
 
 export default async function ImportPage() {
   await requirePermission("masters.manage");
