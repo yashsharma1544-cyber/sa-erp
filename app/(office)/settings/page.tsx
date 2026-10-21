@@ -1,20 +1,23 @@
 import { Building2, Warehouse } from "lucide-react";
-import { requireUser } from "@/lib/auth";
+import { can, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TallySyncCard, type TallySyncStatus } from "./tally-sync-card";
+import { BankAccountsCard, type BankAccountRow } from "./bank-accounts-card";
 
 export default async function SettingsPage() {
   const me = await requireUser();
   const supabase = await createClient();
 
-  const [{ data: firms }, { data: godowns }, { data: settings }, { data: sync }] = await Promise.all([
+  const [{ data: firms }, { data: godowns }, { data: settings }, { data: sync }, { data: banks }, { data: ledgers }] = await Promise.all([
     supabase.from("firms").select("id, code, name, gst_registered, gstin, invoice_prefix").is("deleted_at", null).order("code"),
     supabase.from("godowns").select("id, name, is_counter, address").is("deleted_at", null).order("name"),
     supabase.from("app_settings").select("key, value, description").is("deleted_at", null).order("key"),
     supabase.rpc("tally_sync_status").maybeSingle(),
+    supabase.from("bank_accounts").select("id, firm_id, bank, branch, account_last4, tally_ledger_name, active").is("deleted_at", null).order("bank"),
+    supabase.rpc("tally_bank_ledgers"),
   ]);
 
   return (
@@ -54,6 +57,13 @@ export default async function SettingsPage() {
       </div>
 
       <TallySyncCard sync={(sync as TallySyncStatus | null) ?? null} isOwner={me.roles.includes("owner")} />
+
+      <BankAccountsCard
+        accounts={(banks ?? []) as BankAccountRow[]}
+        firms={(firms ?? []).map((f) => ({ id: f.id, code: f.code, name: f.name }))}
+        ledgers={(ledgers ?? []) as { firm_id: string; ledger_name: string; tally_group: string }[]}
+        canEdit={can(me, "masters.manage")}
+      />
 
       <Card>
         <CardHeader title="Godowns" description="Shared by both firms." />

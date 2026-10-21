@@ -82,6 +82,26 @@ const strings = {
   pickDate: { mr: "तारीख निवडा", en: "Pick a date" },
   moreThanDue: { mr: "रक्कम बाकीपेक्षा जास्त आहे. बरोबर आहे?", en: "This is more than the amount due. Is it right?" },
   language: { mr: "English", en: "मराठी" },
+  // Cash handover
+  handover: { mr: "रोख जमा करा (हँडओव्हर)", en: "Hand over cash" },
+  handoverHint: { mr: "आज घेतलेली रोख ऑफिसला द्या", en: "Give the cash you collected to the office" },
+  cashInHand: { mr: "माझ्याकडील रोख", en: "Cash with me" },
+  receiptsCount: { mr: "{n} पावत्या", en: "{n} receipts" },
+  noCashInHand: { mr: "तुमच्याकडे जमा करायची रोख नाही.", en: "You have no cash to hand over." },
+  countYourNotes: { mr: "तुम्ही देत असलेल्या नोटा मोजा", en: "Count the notes you are handing over" },
+  coins: { mr: "नाणी (₹)", en: "Coins (₹)" },
+  yourCount: { mr: "तुमची मोजणी", en: "Your count" },
+  receiptsSay: { mr: "पावत्यांनुसार", en: "Receipts say" },
+  difference: { mr: "फरक", en: "Difference" },
+  handOverNow: { mr: "हँडओव्हर करा", en: "Hand over" },
+  handoverDone: { mr: "हँडओव्हर {no} झाला. ऑफिस मोजून घेईल.", en: "Handover {no} done. The office will count it." },
+  needNetwork: { mr: "हँडओव्हरसाठी नेटवर्क लागते.", en: "Handover needs network." },
+  myHandovers: { mr: "माझे हँडओव्हर", en: "My handovers" },
+  waitingCount: { mr: "मोजणी बाकी", en: "Waiting to be counted" },
+  counted: { mr: "मोजले", en: "Counted" },
+  short: { mr: "कमी {amt}", en: "Short {amt}" },
+  excess: { mr: "जास्त {amt}", en: "Excess {amt}" },
+  pendingFirst: { mr: "आधी फोनमधील बाकी नोंदी पाठवा.", en: "Send the entries waiting on your phone first." },
 } as const;
 
 export type StringKey = keyof typeof strings;

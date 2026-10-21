@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { CalendarDays, ChevronRight, IndianRupee, LogOut } from "lucide-react";
+import { Banknote, CalendarDays, ChevronRight, IndianRupee, LogOut } from "lucide-react";
 import { can, requireUser } from "@/lib/auth";
 import { roleLabels, t, toLocale } from "@/lib/i18n";
 import { formatDate, todayIST } from "@/lib/format";
@@ -47,6 +47,18 @@ export default async function FieldHome() {
           <span className="flex-1">
             <span className="block text-lg font-semibold text-slate-900">{t(locale, "collect")}</span>
             <span className="block text-sm text-slate-500">{t(locale, "collectHint")}</span>
+          </span>
+          <ChevronRight className="h-5 w-5 text-slate-300" />
+        </Link>
+      ) : null}
+      {can(me, "receipt.record") ? (
+        <Link href="/f/handover" className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-card ring-1 ring-slate-100">
+          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
+            <Banknote className="h-6 w-6" />
+          </span>
+          <span className="flex-1">
+            <span className="block text-lg font-semibold text-slate-900">{t(locale, "handover")}</span>
+            <span className="block text-sm text-slate-500">{t(locale, "handoverHint")}</span>
           </span>
           <ChevronRight className="h-5 w-5 text-slate-300" />
         </Link>

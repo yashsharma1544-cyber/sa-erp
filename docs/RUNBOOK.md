@@ -99,6 +99,18 @@ The status and a **Sync now** button are on **Setup → Firms & settings**.
 4. The pending count on top shows anything not yet sent. Entries the office
    should look at show in red with the reason.
 
+## Cash handover and deposits
+
+1. **Once:** on **Setup → Firms & settings → Bank accounts**, add the account
+   each firm deposits cash into.
+2. **Evening:** the collector opens **रोख जमा करा** on the phone, counts their
+   notes and taps **हँडओव्हर करा**. Or accounts presses **Take handover** on
+   **Collections → Cash & deposits** while the collector is there.
+3. Accounts presses **Count**, types the notes, and accepts. A difference needs
+   a note and stays on that collector's record.
+4. **Deposit:** on the **Deposit** tab pick the firm, tick the counted cash
+   going in, choose the bank, enter the slip number and amount, and record it.
+
 ## Adding a new financial year
 
 Each March, open **JC calendar** → **+ Generate FY xx-yy** (owner only). The SQL alternative is `select public.generate_journey_cycles(2027);`.

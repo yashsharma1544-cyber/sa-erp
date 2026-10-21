@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
+  Banknote,
   Building,
   FileInput,
   IndianRupee,
@@ -41,7 +42,8 @@ export type NavIcon =
   | "suppliers"
   | "vehicles"
   | "import"
-  | "receivables";
+  | "receivables"
+  | "cash";
 export type NavItem = { href: string; label: string; icon: NavIcon; badge?: number };
 export type NavSection = { title?: string; items: NavItem[] };
 
@@ -60,6 +62,7 @@ const icons: Record<NavIcon, LucideIcon> = {
   vehicles: Truck,
   import: FileInput,
   receivables: IndianRupee,
+  cash: Banknote,
 };
 
 function initials(name: string) {
