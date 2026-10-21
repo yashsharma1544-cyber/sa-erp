@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
-import { CalendarDays, LogOut } from "lucide-react";
-import { requireUser } from "@/lib/auth";
+import Link from "next/link";
+import { CalendarDays, ChevronRight, IndianRupee, LogOut } from "lucide-react";
+import { can, requireUser } from "@/lib/auth";
 import { roleLabels, t, toLocale } from "@/lib/i18n";
 import { formatDate, todayIST } from "@/lib/format";
 import { journeyCycleFor, jcDay } from "@/lib/jc";
@@ -38,7 +39,20 @@ export default async function FieldHome() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-5 text-slate-600">{t(locale, "comingSoon")}</div>
+      {can(me, "receipt.record") ? (
+        <Link href="/f/collect" className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-card ring-1 ring-slate-100">
+          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+            <IndianRupee className="h-6 w-6" />
+          </span>
+          <span className="flex-1">
+            <span className="block text-lg font-semibold text-slate-900">{t(locale, "collect")}</span>
+            <span className="block text-sm text-slate-500">{t(locale, "collectHint")}</span>
+          </span>
+          <ChevronRight className="h-5 w-5 text-slate-300" />
+        </Link>
+      ) : (
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-5 text-slate-600">{t(locale, "comingSoon")}</div>
+      )}
     </div>
   );
 }

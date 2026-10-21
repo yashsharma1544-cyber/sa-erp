@@ -1,0 +1,13 @@
+{
+  "name": "SA ERP",
+  "short_name": "SA ERP",
+  "description": "Sushil Agencies & Anjali Agency field app",
+  "start_url": "/f",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#15803d",
+  "icons": [
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

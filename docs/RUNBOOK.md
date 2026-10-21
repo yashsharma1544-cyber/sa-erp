@@ -88,6 +88,17 @@ quotes) and use it in both steps. Never put it in Git or a chat.
 
 The status and a **Sync now** button are on **Setup → Firms & settings**.
 
+## Collector app (field)
+
+1. On **Admin → Users**, open the collector and tick their **collection
+   beats**. Sales beats don't count for collection.
+2. Set their PIN and tell them to open the site on their phone, log in with
+   the PIN, then tap **वसुली**. In Chrome use ⋮ → *Add to Home screen*.
+3. Open it once with network at the start of the day. After that it works
+   without network, and entries are sent when the network is back.
+4. The pending count on top shows anything not yet sent. Entries the office
+   should look at show in red with the reason.
+
 ## Adding a new financial year
 
 Each March, open **JC calendar** → **+ Generate FY xx-yy** (owner only). The SQL alternative is `select public.generate_journey_cycles(2027);`.
