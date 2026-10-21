@@ -54,6 +54,27 @@ export async function saveCustomer(input: CustomerInput): Promise<ActionResult &
   return { ok: "Customer added", id: data.id };
 }
 
+const BulkBeat = z.object({
+  ids: z.array(z.string().uuid()).min(1, "Pick at least one customer").max(500, "Pick at most 500 at a time"),
+  beatId: z.string().uuid().nullable(),
+});
+
+/** Set the same beat on many customers at once (the beat is audit-logged per customer). */
+export async function setCustomersBeat(input: z.input<typeof BulkBeat>): Promise<ActionResult> {
+  await requirePermission("masters.manage");
+  const parsed = BulkBeat.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("customers")
+    .update({ beat_id: parsed.data.beatId })
+    .in("id", parsed.data.ids)
+    .select("id");
+  if (error) return { error: friendlyError(error) };
+  revalidatePath("/customers");
+  return { ok: `Beat set for ${data?.length ?? 0} customers` };
+}
+
 const FirmAccount = z.object({
   id: z.string().uuid().optional(),
   customerId: z.string().uuid(),
