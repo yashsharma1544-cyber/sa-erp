@@ -12,10 +12,9 @@ export async function loadArCustomers(firmId: string): Promise<ArCustomer[]> {
   const supabase = await createClient();
   return readAll<ArCustomer>((a, b) =>
     supabase
-      .from("v_ar_customers")
-      .select(CUSTOMER_COLUMNS)
-      .eq("firm_id", firmId)
+      .rpc("ar_customers", { p_firm_id: firmId })
       .neq("balance", 0)
+      .select(CUSTOMER_COLUMNS)
       .order("balance", { ascending: false })
       .order("ledger_key")
       .range(a, b),
@@ -25,11 +24,11 @@ export async function loadArCustomers(firmId: string): Promise<ArCustomer[]> {
 export async function loadArBills(firmId: string, ledgerKey?: string): Promise<ArBill[]> {
   const supabase = await createClient();
   return readAll<ArBill>((a, b) => {
-    let q = supabase
-      .from("v_ar_bills")
+    return supabase
+      .rpc("ar_bills", { p_firm_id: firmId, p_ledger_key: ledgerKey ?? null })
       .select("ledger_key, bill_key, bill_no, bill_date, kind, bill_amount, pending, days, bucket, overdue")
-      .eq("firm_id", firmId);
-    if (ledgerKey) q = q.eq("ledger_key", ledgerKey);
-    return q.order("ledger_key").order("bill_date", { ascending: false, nullsFirst: false }).range(a, b);
+      .order("ledger_key")
+      .order("bill_date", { ascending: false, nullsFirst: false })
+      .range(a, b);
   });
 }

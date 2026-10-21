@@ -84,15 +84,15 @@ select set_config('request.jwt.claim.sub', :'owner_auth', false);
 do $$
 declare r record; d record;
 begin
-  select * into r from public.v_ar_customers where ledger_key = 'ram kirana';
+  select * into r from public.ar_customers() where ledger_key = 'ram kirana';
   if r.customer_name <> 'Ram Kirana' or r.beat_name <> 'Lonar' then raise exception 'customer details missing'; end if;
   if (r.b0_15, r.b16_30, r.b31_45, r.b46_60, r.b60_plus) <> (400.00, 800.00, 0.00, 0.00, 450.00) then
     raise exception 'Ram buckets %', row(r.b0_15, r.b16_30, r.b31_45, r.b46_60, r.b60_plus);
   end if;
   if r.overdue <> 450 then raise exception 'Ram overdue % (30 days credit)', r.overdue; end if;
   if r.open_bills <> 3 then raise exception 'Ram open bills %', r.open_bills; end if;
-  if (select b60_plus from public.v_ar_customers where ledger_key = 'old party') <> 500 then raise exception 'older remainder must age 60+'; end if;
-  if (select bucket from public.v_ar_bills where ledger_key = 'ram kirana' and bill_no = 'S/1') <> '60+' then raise exception 'bucket label'; end if;
+  if (select b60_plus from public.ar_customers() where ledger_key = 'old party') <> 500 then raise exception 'older remainder must age 60+'; end if;
+  if (select bucket from public.ar_bills() where ledger_key = 'ram kirana' and bill_no = 'S/1') <> '60+' then raise exception 'bucket label'; end if;
 
   select * into d from public.ar_dso((select id from public.firms where code = 'SA'), private.today_ist() - 29, private.today_ist());
   -- credit sales in 30 days to debtor ledgers: S/2 800 + S/3 300 + S/4 400 = 1500
@@ -103,12 +103,17 @@ $$;
 select set_config('request.jwt.claim.sub', :'sm_auth', false);
 do $$
 begin
-  if exists (select 1 from public.v_ar_customers where ledger_key = 'ram kirana') then
+  if exists (select 1 from public.ar_customers() where ledger_key = 'ram kirana') then
     raise exception 'salesman sees a customer outside his beats';
   end if;
   if exists (select 1 from public.ar_dso((select id from public.firms where code = 'SA'), private.today_ist() - 29, private.today_ist())) then
     raise exception 'field user got DSO';
   end if;
+  begin
+    perform 1 from tally.v_ar_customers limit 1;
+    raise exception 'field user read the raw receivables view';
+  exception when insufficient_privilege then null;
+  end;
   begin
     perform 1 from tally.mv_ar_balances limit 1;
     raise exception 'field user read the raw mirror';

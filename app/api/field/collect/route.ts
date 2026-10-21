@@ -44,9 +44,8 @@ export async function GET(req: NextRequest) {
   const ids = [...byId.keys()];
   for (let i = 0; i < ids.length; i += 150) {
     const { data: bills, error: billError } = await supabase
-      .from("v_ar_bills")
+      .rpc("ar_bills", { p_customer_ids: ids.slice(i, i + 150) })
       .select("customer_id, firm_id, bill_key, bill_no, bill_date, kind, bill_amount, pending, days, overdue")
-      .in("customer_id", ids.slice(i, i + 150))
       .order("bill_date", { ascending: true, nullsFirst: true });
     if (billError) return NextResponse.json({ error: billError.message }, { status: 500 });
     for (const b of bills ?? []) {
