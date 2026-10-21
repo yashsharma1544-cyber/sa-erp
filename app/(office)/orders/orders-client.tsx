@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { ClipboardPaste, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDate, formatINR, formatKg, formatNumber } from "@/lib/format";
 import { PageHeader } from "@/components/ui/page-header";
@@ -73,11 +73,18 @@ export function OrdersClient({ rows, firms, from, to, canCreate }: { rows: Order
         description="Every order is credit-checked when it is placed. Orders that fail, or carry a rate below the price list, wait in Approvals."
         actions={
           canCreate && (
-            <Link href="/orders/new">
-              <Button>
-                <Plus className="h-4 w-4" /> New order
-              </Button>
-            </Link>
+            <div className="flex gap-2">
+              <Link href="/orders/new?paste=1">
+                <Button variant="secondary">
+                  <ClipboardPaste className="h-4 w-4" /> Paste WhatsApp order
+                </Button>
+              </Link>
+              <Link href="/orders/new">
+                <Button>
+                  <Plus className="h-4 w-4" /> New order
+                </Button>
+              </Link>
+            </div>
           )
         }
       />

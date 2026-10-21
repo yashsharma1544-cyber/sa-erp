@@ -105,3 +105,12 @@ export async function usualItems(firmId: string, customerId: string): Promise<Us
   const { data } = await supabase.rpc("customer_usual_items", { p_firm_id: firmId, p_customer_id: customerId }).limit(30);
   return (data ?? []) as UsualItem[];
 }
+
+/** Save the wording of corrected pasted lines so it matches next time. */
+export async function learnItemAliases(rows: { itemId: string; text: string }[]): Promise<void> {
+  await requirePermission("order.create");
+  const valid = rows.filter((r) => uuid.safeParse(r.itemId).success && r.text.trim().length >= 3).slice(0, 100);
+  if (!valid.length) return;
+  const supabase = await createClient();
+  await supabase.rpc("learn_item_aliases", { p: valid.map((r) => ({ item_id: r.itemId, text: r.text })) });
+}

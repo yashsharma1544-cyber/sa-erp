@@ -349,12 +349,13 @@ The salesman order app has history and kg. Office entry and WhatsApp paste parsi
 | Slice | Contents |
 |---|---|
 | 2.1 | Price list per firm (from Tally rates), orders with credit check and discount approval, office order entry and list |
-| 2.2 | Salesman order app: offline, customer history, kg |
-| 2.3 | WhatsApp paste parsing, Mondha counter orders |
+| 2.2 | WhatsApp paste → order lines to check (no salesman app: orders come from Rupyz and WhatsApp, D-62) |
+| 2.3 | Import of the owner's orders to date; Mondha counter orders |
 | 2.4 | Dispatch planning by route day, vehicle/driver, loading sheet |
 | 2.5 | Anjali bills from the ERP; Sushil Tally invoices linked back to orders |
 | 2.6 | Driver app: proof of delivery, cash on delivery |
 | 2.7 | Status board; Tally XML push of Anjali bills |
+| later | Automatic Rupyz / WhatsApp order intake (decided at the end, D-62) |
 
 **Done when** one full day of orders runs through the ERP end to end, both firms are invoiced correctly, and Rupyz order capture is retired.
 

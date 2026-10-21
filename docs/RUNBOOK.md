@@ -187,6 +187,11 @@ needs to be keyed into Tally.
   "Usually buys" or search for them, and enter quantities in the Tally unit.
   The right-hand box shows the total, the GST and the credit check as you
   type.
+- **Paste WhatsApp order** (on Orders): paste the whole message and press
+  **Read message**. Each line becomes an order line. Lines marked **check**
+  or **Not matched** need you to pick the right item; the quoted text under
+  each line is what the message said. The shop name in the message is
+  searched as the customer. Whatever you fix is remembered for next time.
 - A failed credit check or a rate below the list sends the order to
   **Approvals**. Once every request is approved, the order is approved.
 - To cancel, open the order → **Cancel order**, with a reason. This is only
