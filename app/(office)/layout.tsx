@@ -26,7 +26,7 @@ export default async function OfficeLayout({ children }: { children: React.React
         { href: "/approvals", label: "Approvals", icon: "approvals", badge: pendingApprovals ?? 0 },
       ],
     },
-    ...(can(me, "order.create") || can(me, "reports.view_all")
+    ...(can(me, "order.create") || can(me, "reports.view_all") || can(me, "dispatch.manage")
       ? [
           {
             title: "Sales",
@@ -35,6 +35,7 @@ export default async function OfficeLayout({ children }: { children: React.React
               ...(can(me, "order.create")
                 ? [{ href: "/orders/whatsapp", label: "WhatsApp orders", icon: "whatsapp" as const, badge: waWaiting ?? 0 }]
                 : []),
+              ...(can(me, "dispatch.manage") ? [{ href: "/dispatch", label: "Dispatch", icon: "vehicles" as const }] : []),
             ],
           },
         ]

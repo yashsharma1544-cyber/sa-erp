@@ -6,7 +6,7 @@ import { OrdersClient, type OrderListRow } from "./orders-client";
 
 export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ from?: string; to?: string }> }) {
   const me = await requireUser();
-  if (!can(me, "order.create") && !can(me, "reports.view_all")) redirect("/no-access");
+  if (!can(me, "order.create") && !can(me, "reports.view_all") && !can(me, "dispatch.manage")) redirect("/no-access");
   const sp = await searchParams;
   const today = todayIST();
   const iso = /^\d{4}-\d{2}-\d{2}$/;

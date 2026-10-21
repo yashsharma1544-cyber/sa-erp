@@ -253,6 +253,22 @@ needs to be keyed into Tally.
 - To cancel, open the order → **Cancel order**, with a reason. This is only
   possible until loading starts.
 
+## Dispatch
+
+1. Add vehicles once: **Masters → Vehicles**, with capacity in kg. Add
+   drivers on **Admin → Users** with the **Driver** role.
+2. **Sales → Dispatch**, pick the date. Approved orders due by that date are
+   listed by beat (Mehkar orders show on their Tuesday, Lonar on Thursday,
+   D Raja on Friday, city on the order date). Move an order to another day
+   with its date box.
+3. Tick orders (or a whole beat), choose the vehicle and driver, and press
+   **New dispatch**. The bar shows the load against the vehicle's capacity.
+4. **Loading sheet** prints the items per firm in bags and loose packets, and
+   the drops in order, with a column for the shopkeeper's signature.
+5. Press **Start loading**, then **Vehicle left** when it goes (the orders
+   become dispatched), then **Vehicle back**. Before it leaves you can take
+   orders off or cancel the dispatch, and its orders go back to waiting.
+
 ## Adding a new financial year
 
 Each March, open **JC calendar** → **+ Generate FY xx-yy** (owner only). The SQL alternative is `select public.generate_journey_cycles(2027);`.

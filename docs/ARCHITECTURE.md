@@ -353,7 +353,7 @@ The salesman order app has history and kg. Office entry and WhatsApp paste parsi
 | 2.2 | WhatsApp paste → order lines to check (no salesman app: orders come from Rupyz and WhatsApp, D-62) |
 | 2.3 | Orders from the salesmen's WhatsApp groups (owner's Whatsapp Orders project) synced every 5 minutes, placed automatically or checked on WhatsApp orders (D-63…D-66) |
 | 2.3b | Mondha counter orders |
-| 2.4 | Dispatch planning by route day, vehicle/driver, loading sheet |
+| 2.4 | Dispatch planning by route day, vehicle/driver, loading sheet (D-71, D-72); oil out of the ERP (D-70) |
 | 2.5 | Anjali bills from the ERP; Sushil Tally invoices linked back to orders |
 | 2.6 | Driver app: proof of delivery, cash on delivery |
 | 2.7 | Status board; Tally XML push of Anjali bills |
