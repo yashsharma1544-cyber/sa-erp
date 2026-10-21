@@ -46,7 +46,7 @@ I read `tally-data` / `tsv2` read-only on 2026-10-20.
 | None of the Sushil sales vouchers in `tsv2` has an `irn` value. | Either TallySync doesn't capture IRN yet, or e-invoicing isn't active. Open question Q-3. |
 | `tsv2.non_customer_parties` lists "Sushil Agencies" (inter-company Anjali → Sushil), "SUSHIL AGENCIES (NEW MONDHA)" (inter-branch) and "Phone Pay Sales" (payment mode). There are 152 such vouchers in Anjali. | Implemented as a `non_customer_parties` exclusion list. These parties never become customers and are left out of sales, receivables and targets (D-06). |
 | `tsv2.party_erp_beat` has 22 beats in 4 areas plus a "Counter" area (Mondha): Jalna 11, Mehkar 7, D Raja 2, Lonar 1. | This is the seed for beats/territories. "Counter" becomes a special beat for Mondha walk-ins. |
-| The **sa-collections** and **target-confirmation** apps already live in `tsv2`: `ca_payments`, `ca_promises`, `cash_handovers` (with denominations), `cash_deposits`, `ca_customer_flags` (15 bad-debt, 4 ignore), `ca_contacts`/`tc_customer_contacts` (WhatsApp numbers), `tc_salesmen`/`tc_collectors` (PIN logins), and `tc_slabs`/`tc_confirmations` (scheme with e-signatures). | All of this is imported in Phase 0/1 so nothing is lost when those apps retire. The new design keeps their proven ideas: denomination counting and PIN logins. |
+| The **sa-collections** and **target-confirmation** apps already live in `tsv2`: `ca_payments`, `ca_promises`, `cash_handovers` (with denominations), `cash_deposits`, `ca_customer_flags` (15 bad-debt, 4 ignore), `ca_contacts`/`tc_customer_contacts` (WhatsApp numbers), `tc_salesmen`/`tc_collectors` (PIN logins), and `tc_slabs`/`tc_confirmations` (scheme with e-signatures). | Masters, flags, contacts and logins were imported in Phase 0. Payments, promises and handovers were not: they hold no real data, so collections start fresh in the ERP (D-57). The new design keeps their proven ideas: denomination counting and PIN logins. |
 | The target scheme config has `group2_multiplier = 5` (Group 2 kg counts 5× in "weighted kg") and a `group2_floor_kg`. | The Phase 4 scheme engine keeps rules **as configuration**, not code. I'll confirm the 95/5 split vs the weighted-kg rule with you before Phase 4. |
 | A Supabase project **"Sushil Agencies ERP"** (`lmiypuhauntjqcilsuwi`) already exists, with 1,024 customers, 45 items and 24 beats. | Open question Q-1: is this an earlier attempt to ignore, or a source to import from? |
 
@@ -326,7 +326,7 @@ Every slice must:
 | 1.5 | WATi: Marathi receipt with PDF, reminder ladder, promise reminders (templates approved by you) |
 | 1.6 | Credit limits/days per customer per firm, `credit_check()`, approval queue for orders that fail it (orders come from the ERP itself, D-55) |
 | 1.7 | Owner dashboard: collected today/JC, to collect, by collector/beat/territory, promises due today |
-| 1.8 | Import of live sa-collections data (`ca_payments`, promises, handovers), then sa-collections retired |
+| 1.8 | Dropped (D-57): sa-collections holds no real data, so collections start fresh in the ERP |
 
 **Done when:**
 - for a sample of 20 customers, ERP outstanding equals Tally outstanding to the paisa, after adjusting for unmatched ERP receipts;
