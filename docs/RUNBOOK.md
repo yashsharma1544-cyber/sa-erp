@@ -55,6 +55,9 @@ Each March, open **JC calendar** → **+ Generate FY xx-yy** (owner only). The S
 
 ## Adding staff
 
+The six field staff from TallySync are already in (D-36). For each one, on
+**Admin → Users** press **Set up login**, then set their PIN and tell them.
+
 Open **Users** → **+ Add user**.
 - **Field staff** (salesman, collector, driver) get **Field (name + PIN)**. Choose a 4-digit PIN. Easy PINs like 1234 and 0000 are refused.
 - **Office staff** and the **sales admin** get **Office (email)**. An invite email is sent to them.
