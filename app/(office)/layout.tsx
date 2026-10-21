@@ -22,6 +22,9 @@ export default async function OfficeLayout({ children }: { children: React.React
         { href: "/approvals", label: "Approvals", icon: "approvals", badge: pendingApprovals ?? 0 },
       ],
     },
+    ...(can(me, "order.create") || can(me, "reports.view_all")
+      ? [{ title: "Sales", items: [{ href: "/orders", label: "Orders", icon: "orders" as const }] }]
+      : []),
     {
       title: "Collections",
       items: [
@@ -41,6 +44,7 @@ export default async function OfficeLayout({ children }: { children: React.React
       items: [
         { href: "/customers", label: "Customers", icon: "customers" },
         ...(can(me, "credit.manage") ? [{ href: "/credit", label: "Credit terms", icon: "credit" as const }] : []),
+        { href: "/prices", label: "Price list", icon: "prices" as const },
         { href: "/beats", label: "Beats & territories", icon: "beats" },
         { href: "/items", label: "Items", icon: "items" },
         ...(me.roles.some((r) => r !== "salesman" && r !== "collector" && r !== "driver")

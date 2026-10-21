@@ -171,6 +171,27 @@ needs to be keyed into Tally.
 - A Tally receipt shows up once TallySync has sent it (every 10 minutes from
   06:30 to 22:30).
 
+## Price list
+
+- **Masters → Price list**, pick the firm, type the new rate (before GST, per
+  Tally unit) and press **Save**. It applies from today. Oil rates change
+  daily, so update them each morning before orders come in.
+- "from Tally" means the rate came from the last Tally bill when the price
+  list was first made.
+- Items without a rate can still be ordered, but the order taker must type a
+  rate.
+
+## Orders
+
+- **Sales → Orders → New order**: pick the firm and customer, tap items from
+  "Usually buys" or search for them, and enter quantities in the Tally unit.
+  The right-hand box shows the total, the GST and the credit check as you
+  type.
+- A failed credit check or a rate below the list sends the order to
+  **Approvals**. Once every request is approved, the order is approved.
+- To cancel, open the order → **Cancel order**, with a reason. This is only
+  possible until loading starts.
+
 ## Adding a new financial year
 
 Each March, open **JC calendar** → **+ Generate FY xx-yy** (owner only). The SQL alternative is `select public.generate_journey_cycles(2027);`.

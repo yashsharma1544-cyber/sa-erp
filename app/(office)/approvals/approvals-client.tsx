@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { Check, CheckCircle2, X } from "lucide-react";
 import { formatDateTime, formatINR } from "@/lib/format";
 import { PageHeader } from "@/components/ui/page-header";
@@ -25,6 +26,7 @@ export type ApprovalRow = {
   decision_note: string | null;
   requested_by: string | null;
   subject_table: string | null;
+  subject_id: string | null;
   details: {
     salesman?: string;
     credit?: { outstanding?: number; credit_limit?: number; oldest_days?: number | null; credit_days?: number };
@@ -95,7 +97,13 @@ export function ApprovalsClient({
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-semibold text-slate-900">{r.subject_label}</span>
+                  {r.subject_table === "orders" && r.subject_id ? (
+                    <Link href={`/orders/${r.subject_id}`} className="font-semibold text-slate-900 hover:underline">
+                      {r.subject_label}
+                    </Link>
+                  ) : (
+                    <span className="font-semibold text-slate-900">{r.subject_label}</span>
+                  )}
                   <Badge>{r.firm_code}</Badge>
                   <Badge tone="blue" className="capitalize">
                     {r.kind}

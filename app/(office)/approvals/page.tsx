@@ -9,7 +9,7 @@ export default async function ApprovalsPage() {
   const { data } = await supabase
     .from("approval_requests")
     .select(
-      "id, kind, permission_key, subject_label, amount, is_bad_debt, reason, status, created_at, decided_at, decision_note, requested_by, details, subject_table, " +
+      "id, kind, permission_key, subject_label, amount, is_bad_debt, reason, status, created_at, decided_at, decision_note, requested_by, details, subject_table, subject_id, " +
         "firm:firms(code), requester:app_users!approval_requests_requested_by_fkey(full_name), decider:app_users!approval_requests_decided_by_fkey(full_name)",
     )
     .order("created_at", { ascending: false })
