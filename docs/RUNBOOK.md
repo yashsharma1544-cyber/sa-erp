@@ -79,6 +79,7 @@ quotes) and use it in both steps. Never put it in Git or a chat.
    06:30 to 22:20 IST, plus a full re-check at 03:00 IST:
 
    ```sql
+   create extension if not exists pg_cron;
    select cron.schedule('tally-sync', '*/10 1-16 * * *', 'select tally.run_sync(false)');
    select cron.schedule('tally-sync-full', '30 21 * * *', 'select tally.run_sync(true)');
    ```
