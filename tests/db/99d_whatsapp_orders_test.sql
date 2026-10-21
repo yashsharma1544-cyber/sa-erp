@@ -164,3 +164,33 @@ begin
   end if;
 end;
 $$;
+
+-- Rupee sachet billed per kg (like Lion No 5 Rs 20): a plain number is packets × packet weight.
+do $$
+declare it public.items; r record;
+begin
+  select * into it from public.items where id = '00000000-0000-0000-0000-0000000a0001';
+  it.name := 'Test Lion Rs 20 (New)'; it.pack_size_g := 460;
+  select * into r from wa.convert_qty(it, '20rs', 100, null, false);
+  if r.qty <> 46 or r.problem is not null then raise exception 'Rs 20 per kg: %', row_to_json(r); end if;
+  select * into r from wa.convert_qty(it, '20rs', 5, 'kg', false);
+  if r.qty <> 5 then raise exception 'Rs 20 written in kg: %', row_to_json(r); end if;
+  it.pack_size_g := null;
+  select * into r from wa.convert_qty(it, '20rs', 10, null, false);
+  if r.problem is null then raise exception 'missing packet weight not flagged'; end if;
+end;
+$$;
+
+-- A katta of 250 g packs is one standard bag: 80 × 250 g = 20 kg. Sachet items keep a weight.
+do $$
+declare it public.items; r record;
+begin
+  select * into it from public.items where id = '00000000-0000-0000-0000-0000000a0001';
+  it.pack_size_g := 250; it.units_per_case := 80;
+  select * into r from wa.convert_qty(it, '250g', 1, 'ktaa', false);
+  if r.qty <> 20 then raise exception 'katta: %', row_to_json(r); end if;
+  if exists (select 1 from public.items where unit = 'pkt' and supplier_code is not null and kg_per_unit = 0) then
+    raise exception 'sachet item without weight';
+  end if;
+end;
+$$;
