@@ -137,7 +137,7 @@ quotes); you need it in steps 1 and 2. Never put it in Git or a chat.
 - **To check** shows each order's problems:
   - Customer not linked: tap the right shop from the closest names. The link is
     remembered, so the next order from that shop comes in on its own.
-  - Line unclear, unit not understood, or kg not a whole number of packets:
+  - Line unclear or unit not understood (zola, chawal, thaili…):
     **Fix**, pick the item and the quantity in its billing unit, **Save**.
   - Item has no rate: add the rate on **Price list**, then **Sync now** or
     **Place order**.

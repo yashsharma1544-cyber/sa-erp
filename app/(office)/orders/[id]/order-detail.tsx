@@ -13,6 +13,7 @@ import { TD, TH, THead, TR, Table } from "@/components/ui/table";
 import type { CreditCheck } from "../../credit/actions";
 import { cancelOrder } from "../actions";
 import { SOURCE_LABEL, STATUS_LABEL, STATUS_TONE, type OrderStatus } from "../status";
+import { packetsFor } from "@/lib/orders/packets";
 
 export type OrderView = {
   order: {
@@ -25,7 +26,7 @@ export type OrderView = {
   };
   lines: {
     id: string; line_no: number; unit: string; qty: string; kg: string; list_rate: string | null; rate: string;
-    gst_rate: string; taxable: string; gst: string; amount: string; item: { name: string };
+    gst_rate: string; taxable: string; gst: string; amount: string; item: { name: string; unit: string; pack_size_g: string | null };
   }[];
   events: { id: string; from_status: string | null; to_status: OrderStatus; note: string | null; at: string; by: { full_name: string } | null }[];
   approvals: {
@@ -85,6 +86,7 @@ export function OrderDetail({ order: o, lines, events, approvals, canCancel }: O
               <tr>
                 <TH>Item</TH>
                 <TH className="text-right">Qty</TH>
+                <TH className="text-right">Weight</TH>
                 <TH className="text-right">Rate</TH>
                 <TH className="text-right">Taxable</TH>
                 {o.firm.gst_registered && <TH className="text-right">GST</TH>}
@@ -95,11 +97,20 @@ export function OrderDetail({ order: o, lines, events, approvals, canCancel }: O
                 <TR key={l.id}>
                   <TD>
                     <div className="font-medium text-slate-900">{l.item.name}</div>
-                    {Number(l.kg) > 0 && l.unit !== "kg" && <div className="text-xs text-slate-500">{formatKg(l.kg)}</div>}
                   </TD>
                   <TD className="num text-right">
-                    {Number(l.qty)} {l.unit}
+                    {packetsFor(l.item, Number(l.qty)) !== null ? (
+                      <>
+                        {packetsFor(l.item, Number(l.qty))} pkt
+                        <div className="text-xs text-slate-500">billed {Number(l.qty)} kg</div>
+                      </>
+                    ) : (
+                      <>
+                        {Number(l.qty)} {l.unit}
+                      </>
+                    )}
                   </TD>
+                  <TD className="num text-right">{Number(l.kg) > 0 ? formatKg(l.kg) : "—"}</TD>
                   <TD className="num text-right">
                     {formatINR(l.rate)}
                     {l.list_rate && Number(l.rate) < Number(l.list_rate) && (

@@ -14,13 +14,14 @@ import { Alert, Input, Select } from "@/components/ui/field";
 import { TD, TH, THead, TR, Table } from "@/components/ui/table";
 import { searchCustomers, type CustomerHit } from "../actions";
 import { STATUS_LABEL, STATUS_TONE, type OrderStatus } from "../status";
+import { packetsFor } from "@/lib/orders/packets";
 import { customerSuggestions, ignoreOrder, linkCustomer, placeOrder, removeLine, setLine, syncNow, type Suggestion } from "./actions";
 
 type Line = {
   id: string; line_no: number; raw_line: string | null; wa_item_name: string | null; pack: string | null;
   qty_said: string | null; unit_said: string | null; free_qty: string | null; uncertain: boolean;
   item_id: string | null; qty: string | null; kg: string | null; note: string | null; problem: string | null;
-  set_by_office: boolean; item: { name: string; unit: string } | null;
+  set_by_office: boolean; item: { name: string; unit: string; pack_size_g: string | null } | null;
 };
 export type WaOrder = {
   id: string; external_key: string; group_name: string | null; sent_at: string; sender_name: string | null;
@@ -251,10 +252,19 @@ function LineRow({
             <Input className="w-24 text-right" inputMode="decimal" value={qty} onChange={(e) => setQty(e.target.value.replace(/[^\d.]/g, ""))} />
             <span className="text-xs text-slate-500">{unit}</span>
           </div>
-        ) : l.qty ? (
-          <>
-            {Number(l.qty)} {l.item?.unit}
-          </>
+        ) : l.qty && l.item ? (
+          (() => {
+            const pkts = packetsFor(l.item, Number(l.qty));
+            return pkts !== null ? (
+              <>
+                {pkts} pkt<div className="text-xs text-slate-500">billed {Number(l.qty)} kg</div>
+              </>
+            ) : (
+              <>
+                {Number(l.qty)} {l.item.unit}
+              </>
+            );
+          })()
         ) : (
           "—"
         )}

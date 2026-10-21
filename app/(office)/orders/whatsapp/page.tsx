@@ -12,7 +12,7 @@ export default async function WhatsAppOrdersPage() {
       .select(
         "id, external_key, group_name, sent_at, sender_name, customer_text, customer_id, message_body, parse_notes, status, problems, order_id, note, " +
           "firm:firms(code), customer:customers(name), salesman:app_users!wa_orders_salesman_id_fkey(full_name), order:orders(order_no, status, total), " +
-          "lines:wa_order_lines(id, line_no, raw_line, wa_item_name, pack, qty_said, unit_said, free_qty, uncertain, item_id, qty, kg, note, problem, set_by_office, deleted_at, item:items(name, unit))",
+          "lines:wa_order_lines(id, line_no, raw_line, wa_item_name, pack, qty_said, unit_said, free_qty, uncertain, item_id, qty, kg, note, problem, set_by_office, deleted_at, item:items(name, unit, pack_size_g))",
       )
       .gte("sent_at", since)
       .order("sent_at", { ascending: false })

@@ -19,12 +19,12 @@ select f.id, '00000000-0000-0000-0000-0000000a0004', 220, private.today_ist() fr
 insert into wa_src.wa_groups values ('g-jalna', 'JALNA LOCAL ORDER', true), ('g-mehkar', 'Mehkar. Booking', true);
 insert into wa_src.wa_salesmen values ('s1', 'Salesman Seven', array['SS 777']);
 insert into wa_src.wa_messages values
-  (1, 'g-jalna', 'w1', 'SS 777', now() - interval '2 hours', 'text', E'Mehkar Shop, Lonar\nT250 2\nL10 1.352kg', 'parsed', null, now(), now()),
+  (1, 'g-jalna', 'w1', 'SS 777', now() - interval '2 hours', 'text', E'Mehkar Shop, Lonar\nT250 2\nL10 2kg', 'parsed', null, now(), now()),
   (2, 'g-mehkar', 'w2', 'Unknown Guy', now() - interval '1 hour', 'text', E'New Party\nT250 5 zola', 'parsed', null, now(), now()),
   (3, 'g-mehkar', 'w3', 'SS 777', now() - interval '1 hour', 'text', E'Someone\nT250 1', 'parsed', null, now(), now());
 insert into wa_src.wa_order_lines (id, message_id, group_jid, sender_name, sent_at, order_no, customer, pack, qty, unit, raw_line, uncertain, item_name) values
   (11, 1, 'g-jalna', 'SS 777', now(), 1, 'Mehkar Shop, Lonar', '250g', 2, null, 'T250 2', false, 'Test Tea 250 Gm'),
-  (12, 1, 'g-jalna', 'SS 777', now(), 1, 'Mehkar Shop, Lonar', '10rs', 1.352, 'kg', 'L10 1.352kg', false, 'Test Lion 10 Rs'),
+  (12, 1, 'g-jalna', 'SS 777', now(), 1, 'Mehkar Shop, Lonar', '10rs', 2, 'kg', 'L10 2kg', false, 'Test Lion 10 Rs'),
   (21, 2, 'g-mehkar', 'Unknown Guy', now(), 1, 'New Party', '250g', 5, 'zola', 'T250 5 zola', false, 'Test Tea 250 Gm'),
   (31, 3, 'g-mehkar', 'SS 777', now(), 1, 'Someone', '250g', 1, null, 'T250 1', false, 'Test Tea 250 Gm');
 
@@ -45,7 +45,7 @@ begin
   select * into r from wa.convert_qty(it, '10rs', 160, null, false);
   if r.qty <> 160 or round(r.kg, 2) <> 108.16 then raise exception 'sachet bare number = pkt: %', row_to_json(r); end if;
   select * into r from wa.convert_qty(it, '10rs', 5, 'kg', false);
-  if r.problem is null then raise exception '5 kg is 7.4 pkt and must be checked'; end if;
+  if r.qty <> 5 or r.problem is not null then raise exception '"5 kg" on a sachet is 5 pkt: %', row_to_json(r); end if;
 end;
 $$;
 
@@ -174,7 +174,7 @@ begin
   select * into r from wa.convert_qty(it, '20rs', 100, null, false);
   if r.qty <> 46 or r.problem is not null then raise exception 'Rs 20 per kg: %', row_to_json(r); end if;
   select * into r from wa.convert_qty(it, '20rs', 5, 'kg', false);
-  if r.qty <> 5 then raise exception 'Rs 20 written in kg: %', row_to_json(r); end if;
+  if r.qty <> 2.3 then raise exception 'Rs 20 written "5 kg" = 5 pkt × 0.46 = 2.3 kg: %', row_to_json(r); end if;
   it.pack_size_g := null;
   select * into r from wa.convert_qty(it, '20rs', 10, null, false);
   if r.problem is null then raise exception 'missing packet weight not flagged'; end if;
@@ -192,5 +192,16 @@ begin
   if exists (select 1 from public.items where unit = 'pkt' and supplier_code is not null and kg_per_unit = 0) then
     raise exception 'sachet item without weight';
   end if;
+end;
+$$;
+
+-- "Vikram Lion 1 Kg 435 RS" is a 1 kg pack: "5 kg" stays 5 kg.
+do $$
+declare it public.items; r record;
+begin
+  select * into it from public.items where id = '00000000-0000-0000-0000-0000000a0001';
+  it.name := 'Test Lion 1 Kg 435 RS'; it.pack_size_g := 1000;
+  select * into r from wa.convert_qty(it, '1kg', 5, 'kg', false);
+  if r.qty <> 5 or r.note like '%packets%' then raise exception '1 kg pack: %', row_to_json(r); end if;
 end;
 $$;

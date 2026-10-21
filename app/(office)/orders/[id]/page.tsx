@@ -19,7 +19,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       .maybeSingle(),
     supabase
       .from("order_lines")
-      .select("id, line_no, unit, qty, kg, list_rate, rate, gst_rate, taxable, gst, amount, item:items(name)")
+      .select("id, line_no, unit, qty, kg, list_rate, rate, gst_rate, taxable, gst, amount, item:items(name, unit, pack_size_g)")
       .eq("order_id", id)
       .is("deleted_at", null)
       .order("line_no"),
