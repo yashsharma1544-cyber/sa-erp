@@ -88,6 +88,62 @@ quotes) and use it in both steps. Never put it in Git or a chat.
 
 The status and a **Sync now** button are on **Setup → Firms & settings**.
 
+## Connect WhatsApp orders (one-time)
+
+The ERP reads the salesmen's WhatsApp orders from the **Whatsapp Orders**
+project through a read-only role (D-63). It can read 4 tables only, never the
+WhatsApp login (`wa_auth`). Pick a long password (letters and digits, no
+quotes); you need it in steps 1 and 2. Never put it in Git or a chat.
+
+1. Supabase → **Whatsapp Orders** → SQL Editor:
+
+   ```sql
+   create role erp_reader login password 'YOUR-LONG-PASSWORD';
+   grant usage on schema public to erp_reader;
+   grant select on public.wa_groups, public.wa_salesmen, public.wa_messages, public.wa_order_lines to erp_reader;
+   create policy erp_reader_read on public.wa_groups      for select to erp_reader using (true);
+   create policy erp_reader_read on public.wa_salesmen    for select to erp_reader using (true);
+   create policy erp_reader_read on public.wa_messages    for select to erp_reader using (true);
+   create policy erp_reader_read on public.wa_order_lines for select to erp_reader using (true);
+   ```
+
+2. Supabase → **sa-erp** → SQL Editor:
+
+   ```sql
+   select wa.connect_source('db.derzrxlrudyfkqtzwktg.supabase.co', 5432, 'postgres', 'erp_reader', 'YOUR-LONG-PASSWORD');
+   select wa.run_sync('manual');
+   ```
+
+   The result should say `"status": "ok"` with how many orders came in and
+   how many were placed. If the server can't be reached, open Whatsapp Orders
+   → **Connect** → **Session pooler**, and run `connect_source` again with that
+   host, and with user `erp_reader.derzrxlrudyfkqtzwktg`.
+
+3. Turn on the schedule (sa-erp → SQL Editor). It runs every 5 minutes from
+   06:30 to 23:00 IST:
+
+   ```sql
+   select cron.schedule('wa-orders-sync', '*/5 1-17 * * *', 'select wa.run_sync()');
+   ```
+
+   To stop it: `select cron.unschedule('wa-orders-sync');`
+
+## WhatsApp orders (daily)
+
+- **Sales → WhatsApp orders** lists what came in over the last 7 days. The
+  menu badge counts the orders waiting for a check.
+- Orders with everything known are placed by themselves. They show the ERP
+  order number and go through credit check and approvals as usual.
+- **To check** shows each order's problems:
+  - Customer not linked: tap the right shop from the closest names. The link is
+    remembered, so the next order from that shop comes in on its own.
+  - Line unclear, unit not understood, or kg not a whole number of packets:
+    **Fix**, pick the item and the quantity in its billing unit, **Save**.
+  - Item has no rate: add the rate on **Price list**, then **Sync now** or
+    **Place order**.
+- **Not an order** (with a reason) for enquiries and duplicates.
+- **Sync now** pulls new messages straight away.
+
 ## Collector app (field)
 
 1. On **Admin → Users**, open the collector and tick their **collection

@@ -249,7 +249,8 @@ Rules that apply on top of the table:
 |---|---|
 | **tsv2 pull** | A Vercel cron (every 10 minutes from 07:00 to 22:00 IST) calls `/api/sync/tally`. It reads `tsv2` through a dedicated read-only Postgres role (`erp_reader`, `SELECT` only on `tsv2`) and upserts into the `tally.*` mirror. The mirror is idempotent and keyed on tsv2 ids, and the pull never writes to `tally-data`. You create `erp_reader` with SQL I'll give you, and nothing runs until you approve it. |
 | **WATi** | A server-side client with the token in Vercel env. Uses Marathi templates only, and every send is logged in `wa_messages`. Receipt PDFs are rendered with `@react-pdf/renderer`, stored in Supabase Storage, and linked by a signed URL. |
-| **Rupyz** | Not synced (D-55). Orders enter the ERP only through the ERP order screens (Phase 2). |
+| **Rupyz** | Not synced (D-55). |
+| **Whatsapp Orders** (`derzrxlrudyfkqtzwktg`) | Read-only `erp_reader` via postgres_fdw: groups, salesmen, messages, order lines → `wa_orders` every 5 minutes (D-63). |
 | **mondha-pos** | Phase 2: either its sales are pulled into the ERP, or Mondha billing moves into the ERP counter screen. To be decided with you then. |
 | **Tally push** | Later: XML import of Anjali bills, receipts and credit notes through a LAN agent. Each push is logged and checked by reading the voucher back through TallySync. |
 
@@ -350,12 +351,13 @@ The salesman order app has history and kg. Office entry and WhatsApp paste parsi
 |---|---|
 | 2.1 | Price list per firm (from Tally rates), orders with credit check and discount approval, office order entry and list |
 | 2.2 | WhatsApp paste → order lines to check (no salesman app: orders come from Rupyz and WhatsApp, D-62) |
-| 2.3 | Import of the owner's orders to date; Mondha counter orders |
+| 2.3 | Orders from the salesmen's WhatsApp groups (owner's Whatsapp Orders project) synced every 5 minutes, placed automatically or checked on WhatsApp orders (D-63…D-66) |
+| 2.3b | Mondha counter orders |
 | 2.4 | Dispatch planning by route day, vehicle/driver, loading sheet |
 | 2.5 | Anjali bills from the ERP; Sushil Tally invoices linked back to orders |
 | 2.6 | Driver app: proof of delivery, cash on delivery |
 | 2.7 | Status board; Tally XML push of Anjali bills |
-| later | Automatic Rupyz / WhatsApp order intake (decided at the end, D-62) |
+| later | Rupyz order intake, if still needed (D-62) |
 
 **Done when** one full day of orders runs through the ERP end to end, both firms are invoiced correctly, and Rupyz order capture is retired.
 

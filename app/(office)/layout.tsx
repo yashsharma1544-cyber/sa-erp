@@ -14,6 +14,10 @@ export default async function OfficeLayout({ children }: { children: React.React
     .from("approval_requests")
     .select("id", { count: "exact", head: true })
     .eq("status", "pending");
+  const { count: waWaiting } = await supabase
+    .from("wa_orders")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "review");
 
   const sections: NavSection[] = [
     {
@@ -23,7 +27,17 @@ export default async function OfficeLayout({ children }: { children: React.React
       ],
     },
     ...(can(me, "order.create") || can(me, "reports.view_all")
-      ? [{ title: "Sales", items: [{ href: "/orders", label: "Orders", icon: "orders" as const }] }]
+      ? [
+          {
+            title: "Sales",
+            items: [
+              { href: "/orders", label: "Orders", icon: "orders" as const },
+              ...(can(me, "order.create")
+                ? [{ href: "/orders/whatsapp", label: "WhatsApp orders", icon: "whatsapp" as const, badge: waWaiting ?? 0 }]
+                : []),
+            ],
+          },
+        ]
       : []),
     {
       title: "Collections",
