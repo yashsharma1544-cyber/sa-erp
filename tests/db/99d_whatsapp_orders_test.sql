@@ -149,3 +149,18 @@ end;
 $$;
 reset role;
 select set_config('request.jwt.claim.sub', '', false);
+
+-- The same item twice in one order waits for the office instead of stopping the sync.
+insert into wa_src.wa_messages values (6, 'g-jalna', 'w6', 'SS 777', now(), 'text', E'Mehkar Shop, Lonar\nT250 1\nT250 2', 'parsed', null, now(), now());
+insert into wa_src.wa_order_lines (id, message_id, group_jid, sender_name, sent_at, order_no, customer, pack, qty, unit, raw_line, uncertain, item_name) values
+  (61, 6, 'g-jalna', 'SS 777', now(), 1, 'Mehkar Shop, Lonar', '250g', 1, null, 'T250 1', false, 'Test Tea 250 Gm'),
+  (62, 6, 'g-jalna', 'SS 777', now(), 1, 'Mehkar Shop, Lonar', '250g', 2, null, 'T250 2', false, 'Test Tea 250 Gm');
+do $$
+declare r jsonb := wa.run_sync();
+begin
+  if r ->> 'status' <> 'ok' then raise exception 'sync %', r; end if;
+  if not exists (select 1 from public.wa_orders where external_key = '6:1' and 'The same item is on two lines'::text = any (problems)) then
+    raise exception 'duplicate item: %', (select problems from public.wa_orders where external_key = '6:1');
+  end if;
+end;
+$$;
