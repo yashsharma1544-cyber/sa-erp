@@ -6,7 +6,9 @@ import { useEffect, useState } from "react";
 import {
   Banknote,
   Building,
+  FileCheck2,
   FileInput,
+  GitCompareArrows,
   IndianRupee,
   CalendarDays,
   KeyRound,
@@ -43,7 +45,9 @@ export type NavIcon =
   | "vehicles"
   | "import"
   | "receivables"
-  | "cash";
+  | "cash"
+  | "cheques"
+  | "match";
 export type NavItem = { href: string; label: string; icon: NavIcon; badge?: number };
 export type NavSection = { title?: string; items: NavItem[] };
 
@@ -63,6 +67,8 @@ const icons: Record<NavIcon, LucideIcon> = {
   import: FileInput,
   receivables: IndianRupee,
   cash: Banknote,
+  cheques: FileCheck2,
+  match: GitCompareArrows,
 };
 
 function initials(name: string) {

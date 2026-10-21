@@ -111,6 +111,23 @@ The status and a **Sync now** button are on **Setup → Firms & settings**.
 4. **Deposit:** on the **Deposit** tab pick the firm, tick the counted cash
    going in, choose the bank, enter the slip number and amount, and record it.
 
+## Cheques
+
+**Collections → Cheques**, per firm:
+- **In hand:** tick the cheques going to the bank (post-dated ones can't be
+  ticked until their date), then **Deposit**.
+- **Deposited:** mark **Cleared** when the bank credits it, or **Bounced** with
+  the bank's reason. A bounce alerts the owner and books the ₹500 charge.
+- **Bounced:** once the debit note is made in Tally, press **Charge…** and
+  enter its number. Only the owner can waive a charge.
+
+## Tally match
+
+**Collections → Tally match** shows ERP receipts that aren't in Tally yet.
+Most match by themselves after each sync. For the rest, press **Find in
+Tally** and pick the right voucher. Anything waiting more than 2 days still
+needs to be keyed into Tally.
+
 ## Adding a new financial year
 
 Each March, open **JC calendar** → **+ Generate FY xx-yy** (owner only). The SQL alternative is `select public.generate_journey_cycles(2027);`.

@@ -29,6 +29,10 @@ export default async function OfficeLayout({ children }: { children: React.React
         ...(can(me, "handover.count") || can(me, "deposit.record")
           ? [{ href: "/cash", label: "Cash & deposits", icon: "cash" as const }]
           : []),
+        ...(can(me, "cheque.manage") || can(me, "reports.view_all")
+          ? [{ href: "/cheques", label: "Cheques", icon: "cheques" as const }]
+          : []),
+        ...(can(me, "reports.view_all") ? [{ href: "/tally-match", label: "Tally match", icon: "match" as const }] : []),
       ],
     },
     {

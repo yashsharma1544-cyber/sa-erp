@@ -2,11 +2,12 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, CheckCircle2, IndianRupee, Target, Users, Wallet } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate, formatNumber, todayIST } from "@/lib/format";
+import { formatDate, formatINR, formatNumber, todayIST } from "@/lib/format";
 import { jcDay } from "@/lib/jc";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { AlertsCard, type AlertRow } from "./alerts-card";
 
 function greeting(): string {
   const hour = Number(
@@ -22,7 +23,7 @@ export default async function HomePage() {
   const supabase = await createClient();
   const today = todayIST();
 
-  const [{ data: jc }, { count: pending }, { count: activeUsers }, { data: firms }] = await Promise.all([
+  const [{ data: jc }, { count: pending }, { count: activeUsers }, { data: firms }, { data: alerts }, { data: todayReceipts }] = await Promise.all([
     supabase
       .from("v_journey_cycles")
       .select("jc_label, jc_number, start_date, end_date, days")
@@ -32,7 +33,11 @@ export default async function HomePage() {
     supabase.from("approval_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("app_users").select("id", { count: "exact", head: true }).is("deleted_at", null).eq("active", true),
     supabase.from("firms").select("code, name, gst_registered").is("deleted_at", null).order("code"),
+    supabase.from("alerts").select("id, title, body, created_at").is("read_at", null).is("deleted_at", null).order("created_at", { ascending: false }).limit(20),
+    supabase.from("receipts").select("amount, mode").eq("collected_on", today).not("status", "in", "(cancelled,bounced)").is("deleted_at", null),
   ]);
+  const collected = (todayReceipts ?? []).reduce((s, r) => s + Number(r.amount), 0);
+  const collectedCash = (todayReceipts ?? []).filter((r) => r.mode === "cash").reduce((s, r) => s + Number(r.amount), 0);
 
   const day = jc ? jcDay(today) : 0;
   const pct = jc ? Math.round((day / jc.days) * 100) : 0;
@@ -55,6 +60,8 @@ export default async function HomePage() {
           ))}
         </div>
       </div>
+
+      {me.roles.includes("owner") && <AlertsCard alerts={(alerts ?? []) as AlertRow[]} />}
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
@@ -89,13 +96,14 @@ export default async function HomePage() {
           value={formatNumber(activeUsers ?? 0)}
           sub="Office and field logins"
         />
-        <StatCard
-          tone="muted"
-          label="Collected today"
-          icon={<Wallet className="h-4 w-4" />}
-          value="—"
-          sub="Arrives with Phase 1 collections"
-        />
+        <Link href="/cash" className="block transition hover:-translate-y-0.5">
+          <StatCard
+            label="Collected today"
+            icon={<Wallet className="h-4 w-4" />}
+            value={formatINR(collected).replace(/\.00$/, "")}
+            sub={`${formatNumber((todayReceipts ?? []).length)} receipts · cash ${formatINR(collectedCash).replace(/\.00$/, "")}`}
+          />
+        </Link>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
